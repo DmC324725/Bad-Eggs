@@ -18,7 +18,8 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 20px;
-    position: relative; /* For positioning the move-popup */
+    position: relative;
+    /* For positioning the move-popup */
     width: 100%;
     max-width: 1000px;
     justify-content: center;
@@ -27,10 +28,10 @@ body {
 /* === 2. CONTROLS BAR (TOP) === */
 .controls {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     gap: 20px;
-    align-items: center; 
-    justify-content: space-between; 
+    align-items: center;
+    justify-content: space-between;
     padding: 10px 20px;
     background: #fff;
     border: 2px solid #444;
@@ -95,7 +96,8 @@ body {
     grid-template-columns: repeat(7, 60px);
     grid-template-rows: repeat(7, 60px);
     gap: 3px;
-    background-color: #8b4513; /* Dark wood color */
+    background-color: #8b4513;
+    /* Dark wood color */
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU:bnM:bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY:YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NkIxMEU4MjgxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiIHhtE1NOOkRvY3VtZW50SUQ9InhtcC5kaWQ6NkIxMEU4MjkxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2QjEwRTgyNjE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2QjEwRTgyNzE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wYWNrZXQ6IGVuZD0icSI/PuBv5G4AAABUSURBVHjaYvj4+BQDCLD8/PyMTAwMDBRkUMcWmxjEMLqQJMwJkBWLwRxELJYJNVLYZCJLdFwMhIpRjBgLAwL/Gf5n+B8lQWJiaGj4n6lATQOIMAAEGAAt6A4E/R/LIAAAAABJRU5ErkJggg==");
     border: 5px solid #6a340b;
     border-radius: 8px;
@@ -120,27 +122,59 @@ body {
 }
 
 /* Home cell colors */
-.home-red { background-color: #ffcdd2; }
-.home-blue { background-color: #bbdefb; }
-.home-green { background-color: #c8e6c9; }
-.home-yellow { background-color: #fff9c4; }
+.home-red {
+    background-color: #ffcdd2;
+}
+
+.home-blue {
+    background-color: #bbdefb;
+}
+
+.home-green {
+    background-color: #c8e6c9;
+}
+
+.home-yellow {
+    background-color: #fff9c4;
+}
 
 /* === 4. PAWN STYLES & ANIMATIONS === */
 @keyframes pawn-shimmer {
-    0% { box-shadow: 0 0 2px 1px #00ffff; }
-    50% { box-shadow: 0 0 8px 3px #00ffff; }
-    100% { box-shadow: 0 0 2px 1px #00ffff; }
+    0% {
+        box-shadow: 0 0 2px 1px #00ffff;
+    }
+
+    50% {
+        box-shadow: 0 0 8px 3px #00ffff;
+    }
+
+    100% {
+        box-shadow: 0 0 2px 1px #00ffff;
+    }
 }
 
 @keyframes target-shimmer {
-    0% { border-color: #ff9900; }
-    50% { border-color: #ffcc00; }
-    100% { border-color: #ff9900; }
+    0% {
+        border-color: #ff9900;
+    }
+
+    50% {
+        border-color: #ffcc00;
+    }
+
+    100% {
+        border-color: #ff9900;
+    }
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* The actual pawn on the board */
@@ -167,10 +201,21 @@ body {
 }
 
 /* Pawn colors */
-.pawn-stack-red { background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%); }
-.pawn-stack-blue { background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%); }
-.pawn-stack-green { background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%); }
-.pawn-stack-yellow { background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%); }
+.pawn-stack-red {
+    background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%);
+}
+
+.pawn-stack-blue {
+    background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%);
+}
+
+.pawn-stack-green {
+    background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%);
+}
+
+.pawn-stack-yellow {
+    background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%);
+}
 
 /* Number on the pawn */
 .pawn-counter {
@@ -203,9 +248,9 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-content: flex-start;
-    align-items: center; 
+    align-items: center;
     gap: 5px;
     min-width: 200px;
     max-width: 300px;
@@ -225,6 +270,7 @@ body {
     width: 20px;
     height: 20px;
 }
+
 #off-board-area .pawn-counter {
     font-size: 12px;
 }
@@ -238,12 +284,14 @@ body {
     min-width: 150px;
     min-height: 50px;
 }
+
 #winners-area h3 {
     margin: 0 0 5px 0;
     text-align: center;
     font-size: 1em;
     font-weight: bold;
 }
+
 #winners-list {
     margin: 0;
     padding-left: 20px;
@@ -255,7 +303,8 @@ body {
     width: 100%;
     min-height: 100px;
     padding: 10px;
-    background-color: #374151; /* Darker panel */
+    background-color: #374151;
+    /* Darker panel */
     color: white;
     border: 2px solid #9e9e9e;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -267,6 +316,7 @@ body {
     padding: 20px;
     position: relative;
 }
+
 .dice-roller h1 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -285,20 +335,23 @@ body {
 
 .dice-roller .dice {
     width: 100%;
-    padding-top: 100%; /* 1:1 Aspect Ratio */
+    padding-top: 100%;
+    /* 1:1 Aspect Ratio */
     height: 0;
     position: relative;
     font-size: 1.5rem;
     font-weight: 700;
-    border-radius: 9999px; /* Circle */
+    border-radius: 9999px;
+    /* Circle */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     color: white;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.1);
-    background-color: #4b5563; /* Gray */
+    background-color: #4b5563;
+    /* Gray */
 }
 
-.dice-roller .dice > * {
+.dice-roller .dice>* {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -311,26 +364,31 @@ body {
 }
 
 .dice-roller .dice.dice-bg-rolling {
-    background-color: #374151; /* Darker gray */
+    background-color: #374151;
+    /* Darker gray */
 }
 
 .dice-roller .dice.dice-bg-1 {
-    background-color: #0e7490; /* Cyan */
+    background-color: #0e7490;
+    /* Cyan */
 }
 
 .dice-roller .dice.dice-bg-0 {
-     background-color: #4b5563; /* Gray */
+    background-color: #4b5563;
+    /* Gray */
 }
 
 #result-display-container {
     text-align: center;
     margin-bottom: 2rem;
 }
+
 #result-display-container h2 {
     font-size: 1.125rem;
     color: #9ca3af;
     margin: 0 0 0.5rem 0;
 }
+
 #result-display {
     font-size: 3.75rem;
     font-weight: 900;
@@ -338,9 +396,18 @@ body {
     line-height: 1;
     color: white;
 }
-#result-display.dice-result-12 { color: #facc15; }
-#result-display.dice-result-6 { color: #a3e635; }
-#result-display.dice-result-normal { color: #22d3ee; }
+
+#result-display.dice-result-12 {
+    color: #facc15;
+}
+
+#result-display.dice-result-6 {
+    color: #a3e635;
+}
+
+#result-display.dice-result-normal {
+    color: #22d3ee;
+}
 
 #roll-button {
     width: 100%;
@@ -354,9 +421,19 @@ body {
     transition: all 0.2s;
     border: none;
 }
-#roll-button:hover { background-color: #0e7490; }
-#roll-button:active { transform: scale(0.95); }
-#roll-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#roll-button:hover {
+    background-color: #0e7490;
+}
+
+#roll-button:active {
+    transform: scale(0.95);
+}
+
+#roll-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 #confetti-container {
     position: absolute;
@@ -365,6 +442,7 @@ body {
     pointer-events: none;
     border-radius: 0.5rem;
 }
+
 .confetti-piece {
     position: absolute;
     width: 8px;
@@ -374,14 +452,28 @@ body {
     transition: transform 2s ease-out, opacity 2s ease-out;
     will-change: transform, opacity;
 }
-.confetti-yellow { background-color: #facc15; }
-.confetti-cyan { background-color: #22d3ee; }
-.confetti-pink { background-color: #ec4899; }
-.confetti-lime { background-color: #a3e635; }
+
+.confetti-yellow {
+    background-color: #facc15;
+}
+
+.confetti-cyan {
+    background-color: #22d3ee;
+}
+
+.confetti-pink {
+    background-color: #ec4899;
+}
+
+.confetti-lime {
+    background-color: #a3e635;
+}
 
 
 /* === 7. POPUP & MODAL STYLES === */
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+}
 
 #popup-menu {
     position: absolute;
@@ -395,6 +487,7 @@ body {
     flex-direction: column;
     gap: 5px;
 }
+
 #popup-menu button {
     width: 100%;
     padding: 10px 5px;
@@ -404,20 +497,36 @@ body {
     border: none;
     border-radius: 3px;
 }
-#popup-move { background-color: #4CAF50; color: white; }
-#popup-select-instead { background-color: #2196F3; color: white; }
-#popup-cancel { background-color: #f44336; color: white; }
+
+#popup-move {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#popup-select-instead {
+    background-color: #2196F3;
+    color: white;
+}
+
+#popup-cancel {
+    background-color: #f44336;
+    color: white;
+}
 
 #modal-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;
 }
 
 #post-move-popup {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     background: #fff;
     border: 2px solid #444;
@@ -426,12 +535,17 @@ body {
     z-index: 101;
     text-align: center;
 }
-#post-move-popup h3 { margin-top: 0; }
+
+#post-move-popup h3 {
+    margin-top: 0;
+}
+
 #post-move-popup .button-group {
     display: flex;
     gap: 10px;
     justify-content: center;
 }
+
 #post-move-popup button {
     font-size: 16px;
     padding: 10px 15px;
@@ -440,22 +554,31 @@ body {
     border: none;
     color: white;
 }
-#repeat-turn-btn { background-color: #2196F3; }
-#end-turn-btn { background-color: #757575; }
+
+#repeat-turn-btn {
+    background-color: #2196F3;
+}
+
+#end-turn-btn {
+    background-color: #757575;
+}
 
 /* === 8. RESPONSIVE DESIGN === */
 @media (max-width: 900px) {
+
     /* Stack board and sidebar on top of each other */
     .full-game-wrapper {
         flex-direction: column;
         align-items: center;
     }
+
     .sidebar {
         flex-direction: row;
         flex-wrap: wrap;
         width: 100%;
         justify-content: center;
     }
+
     .dice-roller {
         width: 100%;
         max-width: 320px;
@@ -463,30 +586,76 @@ body {
 }
 
 @media (max-width: 680px) {
+
     /* Stack control bar groups */
     .controls {
         flex-direction: column;
         align-items: center;
     }
-    .control-group, .status-panels {
+
+    .control-group,
+    .status-panels {
         justify-content: center;
     }
+
     /* Shrink game board for small phones */
     #game-board {
         grid-template-columns: repeat(7, 44px);
         grid-template-rows: repeat(7, 44px);
         border-width: 3px;
     }
+
     .grid-cell {
         min-width: 44px;
         min-height: 44px;
     }
+
     .sidebar {
         flex-direction: column;
         align-items: center;
     }
+
     .dice-roller {
         width: 100%;
-        max-width: 320px; /* Match board width */
+        max-width: 320px;
+        /* Match board width */
     }
+}
+
+/* --- NEW: Dice Reset Button Styles --- */
+#reset-dice-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #9ca3af;
+    border-radius: 50%;
+
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 20;
+    /* Ensure it sits above confetti */
+}
+
+#reset-dice-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: rotate(180deg);
+    /* Fun spin effect on hover */
+    border-color: white;
+}
+
+#reset-dice-btn:active {
+    transform: scale(0.9);
 }
