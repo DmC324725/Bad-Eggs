@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Board Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="controls">
+        <div class="control-group">
+            <div>
+                <button id="mode-toggle">Toggle Mode</button>
+                <p>Current Mode: <span id="mode-display">Solo</span></p>
+            </div>
+            <div>
+                <p>Current Turn:</p>
+                <div id="turn-display">RED</div>
+            </div>
+            <button id="reset-btn">Reset Game</button>
+        </div>
+
+        <div class="status-panels">
+            <div id="winners-area">
+                <h3>Winners</h3>
+                <ol id="winners-list"></ol>
+            </div>
+            <div id="off-board-area" class="pawn-container">
+                <h3>Off Board</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="full-game-wrapper">
+        <div id="game-board"></div>
+
+        <div class="sidebar">
+            <div id="dice-roller-container" class="dice-roller">
+                <div id="confetti-container"></div>
+                <h1>Special Dice</h1>
+                <div id="dice-container">
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                    <div class="dice">
+                        <div>-</div>
+                    </div>
+                </div>
+                <div id="result-display-container">
+                    <h2>Total</h2>
+                    <div id="result-display">0</div>
+                </div>
+                <button id="roll-button">Roll</button>
+            </div>
+        </div>
+
+        <div id="popup-menu" class="hidden">
+            <button id="popup-move">Move here</button>
+            <button id="popup-select-instead" class="hidden">Select this pawn</button>
+            <button id="popup-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="hidden"></div>
+    <div id="post-move-popup" class="hidden">
+        <h3>Move Complete!</h3>
+        <p>What would you like to do?</p>
+        <div class="button-group">
+            <button id="repeat-turn-btn">Repeat Turn</button>
+            <button id="end-turn-btn">End Turn</button>
+        </div>
+    </div>
+
+    <script src="diceRoller.js" defer></script>
+    <script src="boardGame.js" defer></script>
+
+</body>
+
+</html>
