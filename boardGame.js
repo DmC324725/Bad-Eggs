@@ -649,6 +649,12 @@
                 hidePopup();
                 return;
             }
+
+            // Fix: Remove highlight from previous target if changing mind
+            if (tempDestinationId) {
+                const prevTarget = document.getElementById(tempDestinationId);
+                if (prevTarget) prevTarget.classList.remove('target-cell');
+            }
             
             tempDestinationId = containerId;
             
