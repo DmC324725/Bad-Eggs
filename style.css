@@ -1,9 +1,11 @@
+/* === 1. GLOBAL & LAYOUT === */
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 90vh;
     background-color: #f0f0f0;
+    /* This is a subtle background texture */
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEVbU0NaU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0XwXxy4wAAAAGnRSTlM5PHt8gIKGj5KVl5mZpqeoqaqrrK6xs77BwsrM5uvt7fHxXGmLJAAAAIJJREFUSMftlsUSgCAIROlFu3m/u/9NqwhNnZ8Dz0B4zQJAIvt5QJVgIEI0D/Q4PMjEFCs61Bwq/L661fC8gBDZ7AYiQoA5l0sAiVoBvA5l4AQCJQFyLgUCTQGgC3K+BGoigCbI+RSoiACbIOeTQEIGaIOcT0IiBGCDnA8jQoD11Mgu0P0AAAAASUVORK5CYII=");
     font-family: sans-serif;
     gap: 20px;
@@ -11,7 +13,18 @@ body {
     box-sizing: border-box;
 }
 
-/* --- Controls Bar Redesign --- */
+/* This is the main content area holding the board and sidebar */
+.full-game-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative; /* For positioning the move-popup */
+    width: 100%;
+    max-width: 1000px;
+    justify-content: center;
+}
+
+/* === 2. CONTROLS BAR (TOP) === */
 .controls {
     display: flex;
     flex-wrap: wrap; 
@@ -28,6 +41,7 @@ body {
     box-sizing: border-box;
 }
 
+/* Left side of the control bar */
 .control-group {
     display: flex;
     flex-wrap: wrap;
@@ -35,6 +49,7 @@ body {
     align-items: center;
 }
 
+/* Right side of the control bar */
 .status-panels {
     display: flex;
     flex-wrap: wrap;
@@ -67,22 +82,20 @@ body {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.full-game-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    position: relative;
-    width: 100%;
-    max-width: 1000px;
-    justify-content: center;
+#reset-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    height: 50px;
 }
 
+/* === 3. GAME BOARD === */
 #game-board {
     display: grid;
     grid-template-columns: repeat(7, 60px);
     grid-template-rows: repeat(7, 60px);
     gap: 3px;
-    background-color: #8b4513;
+    background-color: #8b4513; /* Dark wood color */
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU:bnM:bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY:YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NkIxMEU4MjgxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiIHhtE1NOOkRvY3VtZW50SUQ9InhtcC5kaWQ6NkIxMEU4MjkxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2QjEwRTgyNjE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2QjEwRTgyNzE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wYWNrZXQ6IGVuZD0icSI/PuBv5G4AAABUSURBVHjaYvj4+BQDCLD8/PyMTAwMDBRkUMcWmxjEMLqQJMwJkBWLwRxELJYJNVLYZCJLdFwMhIpRjBgLAwL/Gf5n+B8lQWJiaGj4n6lATQOIMAAEGAAt6A4E/R/LIAAAAABJRU5ErkJggg==");
     border: 5px solid #6a340b;
     border-radius: 8px;
@@ -106,11 +119,13 @@ body {
     position: relative;
 }
 
+/* Home cell colors */
 .home-red { background-color: #ffcdd2; }
 .home-blue { background-color: #bbdefb; }
 .home-green { background-color: #c8e6c9; }
 .home-yellow { background-color: #fff9c4; }
 
+/* === 4. PAWN STYLES & ANIMATIONS === */
 @keyframes pawn-shimmer {
     0% { box-shadow: 0 0 2px 1px #00ffff; }
     50% { box-shadow: 0 0 8px 3px #00ffff; }
@@ -128,6 +143,7 @@ body {
     to { transform: rotate(360deg); }
 }
 
+/* The actual pawn on the board */
 .pawn-stack {
     width: 26px;
     height: 26px;
@@ -150,11 +166,13 @@ body {
     border-style: solid;
 }
 
+/* Pawn colors */
 .pawn-stack-red { background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%); }
 .pawn-stack-blue { background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%); }
 .pawn-stack-green { background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%); }
 .pawn-stack-yellow { background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%); }
 
+/* Number on the pawn */
 .pawn-counter {
     position: absolute;
     top: 50%;
@@ -166,6 +184,8 @@ body {
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
+/* === 5. SIDEBAR & STATUS PANELS === */
+
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -174,20 +194,7 @@ body {
     flex-shrink: 0;
 }
 
-.dice-roller {
-    width: 100%;
-    min-height: 100px;
-    padding: 10px;
-    background-color: #e0e0e0;
-    border: 2px solid #9e9e9e;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    box-sizing: border-box;
-}
-
+/* Panels in the top bar */
 #off-board-area {
     background-color: #f3f3f3;
     border: 2px solid #ccc;
@@ -213,6 +220,7 @@ body {
     font-weight: bold;
 }
 
+/* Make pawns in the top bar smaller */
 #off-board-area .pawn-stack {
     width: 20px;
     height: 20px;
@@ -242,13 +250,137 @@ body {
     font-size: 0.9em;
 }
 
-#reset-btn {
-    background-color: #f44336;
+/* === 6. DICE ROLLER STYLES === */
+.dice-roller {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    background-color: #374151; /* Darker panel */
     color: white;
-    border: none;
-    height: 50px;
+    border: 2px solid #9e9e9e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-sizing: border-box;
+    padding: 20px;
+    position: relative;
+}
+.dice-roller h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #22d3ee;
 }
 
+#dice-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+}
+
+.dice-roller .dice {
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    height: 0;
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-radius: 9999px; /* Circle */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background-color: #4b5563; /* Gray */
+}
+
+.dice-roller .dice > * {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dice-roller .dice.dice-bg-rolling {
+    background-color: #374151; /* Darker gray */
+}
+
+.dice-roller .dice.dice-bg-1 {
+    background-color: #0e7490; /* Cyan */
+}
+
+.dice-roller .dice.dice-bg-0 {
+     background-color: #4b5563; /* Gray */
+}
+
+#result-display-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+#result-display-container h2 {
+    font-size: 1.125rem;
+    color: #9ca3af;
+    margin: 0 0 0.5rem 0;
+}
+#result-display {
+    font-size: 3.75rem;
+    font-weight: 900;
+    height: 4rem;
+    line-height: 1;
+    color: white;
+}
+#result-display.dice-result-12 { color: #facc15; }
+#result-display.dice-result-6 { color: #a3e635; }
+#result-display.dice-result-normal { color: #22d3ee; }
+
+#roll-button {
+    width: 100%;
+    background-color: #0891b2;
+    color: white;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 0.5rem;
+    font-size: 1.125rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    border: none;
+}
+#roll-button:hover { background-color: #0e7490; }
+#roll-button:active { transform: scale(0.95); }
+#roll-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#confetti-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: 0.5rem;
+}
+.confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 16px;
+    border-radius: 4px;
+    opacity: 1;
+    transition: transform 2s ease-out, opacity 2s ease-out;
+    will-change: transform, opacity;
+}
+.confetti-yellow { background-color: #facc15; }
+.confetti-cyan { background-color: #22d3ee; }
+.confetti-pink { background-color: #ec4899; }
+.confetti-lime { background-color: #a3e635; }
+
+
+/* === 7. POPUP & MODAL STYLES === */
 .hidden { display: none !important; }
 
 #popup-menu {
@@ -311,127 +443,9 @@ body {
 #repeat-turn-btn { background-color: #2196F3; }
 #end-turn-btn { background-color: #757575; }
 
-/* --- Dice Roller Styles (Converted from Tailwind) --- */
-.dice-roller {
-    background-color: #374151;
-    color: white;
-    padding: 20px;
-    position: relative;
-}
-.dice-roller h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #22d3ee;
-}
-
-#dice-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 2rem;
-}
-
-.dice-roller .dice {
-    width: 100%;
-    padding-top: 100%;
-    height: 0;
-    position: relative;
-    font-size: 1.5rem;
-    font-weight: 700;
-    border-radius: 9999px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    background-color: #4b5563;
-}
-
-.dice-roller .dice > * {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 40px;
-    width: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dice-roller .dice.dice-bg-rolling {
-    background-color: #374151;
-}
-
-.dice-roller .dice.dice-bg-1 {
-    background-color: #0e7490;
-}
-
-.dice-roller .dice.dice-bg-0 {
-     background-color: #4b5563;
-}
-
-#result-display-container {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-#result-display-container h2 {
-    font-size: 1.125rem;
-    color: #9ca3af;
-    margin: 0 0 0.5rem 0;
-}
-#result-display {
-    font-size: 3.75rem;
-    font-weight: 900;
-    height: 4rem;
-    line-height: 1;
-    color: white;
-}
-#result-display.dice-result-12 { color: #facc15; }
-#result-display.dice-result-6 { color: #a3e635; }
-#result-display.dice-result-normal { color: #22d3ee; }
-
-#roll-button {
-    width: 100%;
-    background-color: #0891b2;
-    color: white;
-    font-weight: 700;
-    padding: 12px 16px;
-    border-radius: 0.5rem;
-    font-size: 1.125rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s;
-    border: none;
-}
-#roll-button:hover { background-color: #0e7490; }
-#roll-button:active { transform: scale(0.95); }
-#roll-button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-#confetti-container {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    border-radius: 0.5rem;
-}
-.confetti-piece {
-    position: absolute;
-    width: 8px;
-    height: 16px;
-    border-radius: 4px;
-    opacity: 1;
-    transition: transform 2s ease-out, opacity 2s ease-out;
-    will-change: transform, opacity;
-}
-.confetti-yellow { background-color: #facc15; }
-.confetti-cyan { background-color: #22d3ee; }
-.confetti-pink { background-color: #ec4899; }
-.confetti-lime { background-color: #a3e635; }
-
-/* --- Tablet & Mobile Responsive Styles --- */
+/* === 8. RESPONSIVE DESIGN === */
 @media (max-width: 900px) {
+    /* Stack board and sidebar on top of each other */
     .full-game-wrapper {
         flex-direction: column;
         align-items: center;
@@ -449,6 +463,7 @@ body {
 }
 
 @media (max-width: 680px) {
+    /* Stack control bar groups */
     .controls {
         flex-direction: column;
         align-items: center;
@@ -456,6 +471,7 @@ body {
     .control-group, .status-panels {
         justify-content: center;
     }
+    /* Shrink game board for small phones */
     #game-board {
         grid-template-columns: repeat(7, 44px);
         grid-template-rows: repeat(7, 44px);

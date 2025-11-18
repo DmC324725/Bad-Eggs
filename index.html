@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ludo Board Game</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -23,7 +25,7 @@
             </div>
             <button id="reset-btn">Reset Game</button>
         </div>
-
+        
         <div class="status-panels">
             <div id="winners-area">
                 <h3>Winners</h3>
@@ -31,36 +33,25 @@
             </div>
             <div id="off-board-area" class="pawn-container">
                 <h3>Off Board</h3>
-            </div>
+                </div>
         </div>
     </div>
 
     <div class="full-game-wrapper">
-        <div id="game-board"></div>
-
+        <div id="game-board">
+            </div>
+        
         <div class="sidebar">
             <div id="dice-roller-container" class="dice-roller">
                 <div id="confetti-container"></div>
                 <h1>Special Dice</h1>
                 <div id="dice-container">
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
-                    <div class="dice">
-                        <div>-</div>
-                    </div>
+                    <div class="dice"><div>-</div></div>
+                    <div class="dice"><div>-</div></div>
+                    <div class="dice"><div>-</div></div>
+                    <div class="dice"><div>-</div></div>
+                    <div class="dice"><div>-</div></div>
+                    <div class="dice"><div>-</div></div>
                 </div>
                 <div id="result-display-container">
                     <h2>Total</h2>
@@ -69,14 +60,14 @@
                 <button id="roll-button">Roll</button>
             </div>
         </div>
-
+        
         <div id="popup-menu" class="hidden">
             <button id="popup-move">Move here</button>
             <button id="popup-select-instead" class="hidden">Select this pawn</button>
             <button id="popup-cancel">Cancel</button>
         </div>
     </div>
-
+    
     <div id="modal-overlay" class="hidden"></div>
     <div id="post-move-popup" class="hidden">
         <h3>Move Complete!</h3>
@@ -91,5 +82,4 @@
     <script src="boardGame.js" defer></script>
 
 </body>
-
 </html>
