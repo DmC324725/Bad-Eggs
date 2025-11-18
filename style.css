@@ -5,27 +5,24 @@ body {
     align-items: center;
     min-height: 90vh;
     background-color: #f0f0f0;
-    /* This is a subtle background texture */
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEVbU0NaU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0XwXxy4wAAAAGnRSTlM5PHt8gIKGj5KVl5mZpqeoqaqrrK6xs77BwsrM5uvt7fHxXGmLJAAAAIJJREFUSMftlsUSgCAIROlFu3m/u/9NqwhNnZ8Dz0B4zQJAIvt5QJVgIEI0D/Q4PMjEFCs61Bwq/L661fC8gBDZ7AYiQoA5l0sAiVoBvA5l4AQCJQFyLgUCTQGgC3K+BGoigCbI+RSoiACbIOeTQEIGaIOcT0IiBGCDnA8jQoD11Mgu0P0AAAAASUVORK5CYII=");
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEVbU0NaU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0XwXxy4wAAAAGnRSTlM5PHt8gIKGj5KVl5mZpqeoqaqrrK6xs77BwsrM5uvt7fHxXGmLJAAAAIJJREFUSMftlsUSgCAIROlFu3m/u/9NqwhNnZ8Dz0B4zQJAIvt5QJVgIEI0D/Q4PMjEFCs61Bwq/L661fC8gBDZ7AYiQoA5l0sAiVoBvA5l4AQCJQFyLgUCTQGgC3K+BGoigCbI+RSoiACbIOeTQEIGaIOcT0IiBGCDnA8jQoD11Mgu0P0AAAAASUVORK5CYII=");
     font-family: sans-serif;
     gap: 20px;
     padding: 20px;
     box-sizing: border-box;
 }
 
-/* This is the main content area holding the board and sidebar */
 .full-game-wrapper {
     display: flex;
     align-items: flex-start;
     gap: 20px;
     position: relative;
-    /* For positioning the move-popup */
     width: 100%;
     max-width: 1000px;
     justify-content: center;
 }
 
-/* === 2. CONTROLS BAR (TOP) === */
+/* === 2. CONTROLS BAR === */
 .controls {
     display: flex;
     flex-wrap: wrap;
@@ -42,7 +39,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Left side of the control bar */
 .control-group {
     display: flex;
     flex-wrap: wrap;
@@ -50,7 +46,6 @@ body {
     align-items: center;
 }
 
-/* Right side of the control bar */
 .status-panels {
     display: flex;
     flex-wrap: wrap;
@@ -62,6 +57,9 @@ body {
     font-size: 16px;
     padding: 8px 12px;
     cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 
 .controls button:disabled {
@@ -72,22 +70,50 @@ body {
 .controls p {
     margin: 0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* --- Turn Stepper Styles --- */
+.turn-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.turn-stepper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #turn-display {
-    padding: 10px;
+    padding: 8px 16px;
     border-radius: 5px;
     color: white;
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    min-width: 80px;
+    text-align: center;
+}
+
+.stepper-btn {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    background-color: #eee;
+    border: 1px solid #bbb;
+}
+
+.stepper-btn:hover {
+    background-color: #ddd;
 }
 
 #reset-btn {
     background-color: #f44336;
     color: white;
     border: none;
-    height: 50px;
+    height: 40px;
 }
 
 /* === 3. GAME BOARD === */
@@ -97,7 +123,6 @@ body {
     grid-template-rows: repeat(7, 60px);
     gap: 3px;
     background-color: #8b4513;
-    /* Dark wood color */
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU:bnM:bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY:YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NkIxMEU4MjgxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiIHhtE1NOOkRvY3VtZW50SUQ9InhtcC5kaWQ6NkIxMEU4MjkxNTZFMTFFMUEzNUVBNDA5MEI4MzU4QUEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2QjEwRTgyNjE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2QjEwRTgyNzE1NkUxMUUxQTM1RUE0MDkwQjgzNThBQSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wYWNrZXQ6IGVuZD0icSI/PuBv5G4AAABUSURBVHjaYvj4+BQDCLD8/PyMTAwMDBRkUMcWmxjEMLqQJMwJkBWLwRxELJYJNVLYZCJLdFwMhIpRjBgLAwL/Gf5n+B8lQWJiaGj4n6lATQOIMAAEGAAt6A4E/R/LIAAAAABJRU5ErkJggg==");
     border: 5px solid #6a340b;
     border-radius: 8px;
@@ -121,7 +146,6 @@ body {
     position: relative;
 }
 
-/* Home cell colors */
 .home-red {
     background-color: #ffcdd2;
 }
@@ -138,7 +162,7 @@ body {
     background-color: #fff9c4;
 }
 
-/* === 4. PAWN STYLES & ANIMATIONS === */
+/* === 4. PAWN STYLES === */
 @keyframes pawn-shimmer {
     0% {
         box-shadow: 0 0 2px 1px #00ffff;
@@ -177,7 +201,6 @@ body {
     }
 }
 
-/* The actual pawn on the board */
 .pawn-stack {
     width: 26px;
     height: 26px;
@@ -200,7 +223,6 @@ body {
     border-style: solid;
 }
 
-/* Pawn colors */
 .pawn-stack-red {
     background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%);
 }
@@ -217,7 +239,6 @@ body {
     background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%);
 }
 
-/* Number on the pawn */
 .pawn-counter {
     position: absolute;
     top: 50%;
@@ -229,8 +250,7 @@ body {
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
-/* === 5. SIDEBAR & STATUS PANELS === */
-
+/* === 5. PANELS & SIDEBAR === */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -239,7 +259,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Panels in the top bar */
 #off-board-area {
     background-color: #f3f3f3;
     border: 2px solid #ccc;
@@ -265,7 +284,6 @@ body {
     font-weight: bold;
 }
 
-/* Make pawns in the top bar smaller */
 #off-board-area .pawn-stack {
     width: 20px;
     height: 20px;
@@ -298,13 +316,12 @@ body {
     font-size: 0.9em;
 }
 
-/* === 6. DICE ROLLER STYLES === */
+/* === 6. DICE ROLLER === */
 .dice-roller {
     width: 100%;
     min-height: 100px;
-    padding: 10px;
+    padding: 20px;
     background-color: #374151;
-    /* Darker panel */
     color: white;
     border: 2px solid #9e9e9e;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -313,7 +330,6 @@ body {
     flex-direction: column;
     gap: 5px;
     box-sizing: border-box;
-    padding: 20px;
     position: relative;
 }
 
@@ -336,19 +352,16 @@ body {
 .dice-roller .dice {
     width: 100%;
     padding-top: 100%;
-    /* 1:1 Aspect Ratio */
     height: 0;
     position: relative;
     font-size: 1.5rem;
     font-weight: 700;
     border-radius: 9999px;
-    /* Circle */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     color: white;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.1);
     background-color: #4b5563;
-    /* Gray */
 }
 
 .dice-roller .dice>* {
@@ -365,17 +378,14 @@ body {
 
 .dice-roller .dice.dice-bg-rolling {
     background-color: #374151;
-    /* Darker gray */
 }
 
 .dice-roller .dice.dice-bg-1 {
     background-color: #0e7490;
-    /* Cyan */
 }
 
 .dice-roller .dice.dice-bg-0 {
     background-color: #4b5563;
-    /* Gray */
 }
 
 #result-display-container {
@@ -435,6 +445,39 @@ body {
     cursor: not-allowed;
 }
 
+/* Reset Button for Dice */
+#reset-dice-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #9ca3af;
+    border-radius: 50%;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 20;
+}
+
+#reset-dice-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: rotate(180deg);
+    border-color: white;
+}
+
+#reset-dice-btn:active {
+    transform: scale(0.9);
+}
+
 #confetti-container {
     position: absolute;
     inset: 0;
@@ -470,7 +513,7 @@ body {
 }
 
 
-/* === 7. POPUP & MODAL STYLES === */
+/* === 7. POPUPS === */
 .hidden {
     display: none !important;
 }
@@ -563,10 +606,8 @@ body {
     background-color: #757575;
 }
 
-/* === 8. RESPONSIVE DESIGN === */
+/* === 8. RESPONSIVE === */
 @media (max-width: 900px) {
-
-    /* Stack board and sidebar on top of each other */
     .full-game-wrapper {
         flex-direction: column;
         align-items: center;
@@ -586,8 +627,6 @@ body {
 }
 
 @media (max-width: 680px) {
-
-    /* Stack control bar groups */
     .controls {
         flex-direction: column;
         align-items: center;
@@ -598,7 +637,6 @@ body {
         justify-content: center;
     }
 
-    /* Shrink game board for small phones */
     #game-board {
         grid-template-columns: repeat(7, 44px);
         grid-template-rows: repeat(7, 44px);
@@ -618,44 +656,5 @@ body {
     .dice-roller {
         width: 100%;
         max-width: 320px;
-        /* Match board width */
     }
-}
-
-/* --- NEW: Dice Reset Button Styles --- */
-#reset-dice-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #9ca3af;
-    border-radius: 50%;
-
-    font-size: 18px;
-    line-height: 1;
-    padding: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 20;
-    /* Ensure it sits above confetti */
-}
-
-#reset-dice-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-    transform: rotate(180deg);
-    /* Fun spin effect on hover */
-    border-color: white;
-}
-
-#reset-dice-btn:active {
-    transform: scale(0.9);
 }

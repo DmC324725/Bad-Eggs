@@ -19,10 +19,16 @@
                 <button id="mode-toggle">Toggle Mode</button>
                 <p>Current Mode: <span id="mode-display">Solo</span></p>
             </div>
-            <div>
+
+            <div class="turn-widget">
                 <p>Current Turn:</p>
-                <div id="turn-display">RED</div>
+                <div class="turn-stepper">
+                    <button id="prev-turn-btn" class="stepper-btn" title="Previous Player">◀</button>
+                    <div id="turn-display">RED</div>
+                    <button id="next-turn-btn" class="stepper-btn" title="Next Player">▶</button>
+                </div>
             </div>
+
             <button id="reset-btn">Reset Game</button>
         </div>
 
