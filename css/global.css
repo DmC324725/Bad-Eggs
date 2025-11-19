@@ -1,0 +1,41 @@
+/* GLOBAL STYLES
+    =============
+    Sets up the body, fonts, and the main container that holds 
+    the board and the sidebar.
+*/
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 90vh;
+    
+    /* Light gray fallback + subtle noise texture */
+    background-color: #f0f0f0;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEVbU0NaU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0VbU0XwXxy4wAAAAGnRSTlM5PHt8gIKGj5KVl5mZpqeoqaqrrK6xs77BwsrM5uvt7fHxXGmLJAAAAIJJREFUSMftlsUSgCAIROlFu3m/u/9NqwhNnZ8Dz0B4zQJAIvt5QJVgIEI0D/Q4PMjEFCs61Bwq/L661fC8gBDZ7AYiQoA5l0sAiVoBvA5l4AQCJQFyLgUCTQGgC3K+BGoigCbI+RSoiACbIOeTQEIGaIOcT0IiBGCDnA8jQoD11Mgu0P0AAAAASUVORK5CYII=");
+    
+    font-family: sans-serif;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Main Wrapper 
+    ------------
+    Holds the #game-board (left) and the .sidebar (right).
+    On mobile, these stack via responsive.css.
+*/
+.full-game-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative; /* Used for positioning absolute popups */
+    width: 100%;
+    max-width: 1000px;
+    justify-content: center;
+}
+
+/* Utility class to hide elements completely */
+.hidden { 
+    display: none !important; 
+}

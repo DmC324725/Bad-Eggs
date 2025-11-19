@@ -1,0 +1,60 @@
+/* PAWN STYLES
+    ===========
+    Styles for the physical game pieces, their colors,
+    and their animations (shimmer, movement).
+*/
+
+/* --- 1. Base Pawn Style --- */
+.pawn-stack {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: inset 0 -3px 4px rgba(0, 0, 0, 0.3), 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* --- 2. Team Colors (Radial Gradients for 3D look) --- */
+.pawn-stack-red { background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%); }
+.pawn-stack-blue { background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%); }
+.pawn-stack-green { background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%); }
+.pawn-stack-yellow { background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%); }
+
+/* --- 3. Counter (Number on top) --- */
+.pawn-counter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+/* --- 4. Selection Animation (Shimmer) --- */
+@keyframes pawn-shimmer {
+    0% { box-shadow: 0 0 2px 1px #00ffff; }
+    50% { box-shadow: 0 0 8px 3px #00ffff; }
+    100% { box-shadow: 0 0 2px 1px #00ffff; }
+}
+
+.pawn-stack.selected-pawn {
+    animation: pawn-shimmer 1.5s infinite;
+    border-color: #00ffff;
+}
+
+/* --- 5. Floating Animation (Movement) --- */
+.floating-pawn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.5);
+    box-sizing: border-box;
+    
+    position: absolute;
+    z-index: 1000; /* Above everything */
+    
+    transition: transform 0.25s linear; /* Matches JS timing */
+}
