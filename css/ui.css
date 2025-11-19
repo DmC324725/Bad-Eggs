@@ -15,10 +15,10 @@
 /* --- 2. Controls Bar --- */
 .controls {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     gap: 20px;
-    align-items: center; 
-    justify-content: space-between; 
+    align-items: center;
+    justify-content: space-between;
     padding: 10px 20px;
     background: #fff;
     border: 2px solid #444;
@@ -52,10 +52,12 @@
     border-radius: 5px;
     background-color: #f9f9f9;
 }
+
 .controls button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
+
 .controls p {
     margin: 0;
     font-weight: bold;
@@ -93,7 +95,10 @@
     background-color: #eee;
     border: 1px solid #bbb;
 }
-.stepper-btn:hover { background-color: #ddd; }
+
+.stepper-btn:hover {
+    background-color: #ddd;
+}
 
 /* --- 4. Status Panels (Winners / Off Board) --- */
 #off-board-area {
@@ -104,9 +109,9 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-content: flex-start;
-    align-items: center; 
+    align-items: center;
     gap: 5px;
     min-width: 200px;
     max-width: 300px;
@@ -130,13 +135,19 @@
     min-width: 150px;
     min-height: 50px;
 }
+
 #winners-area h3 {
     margin: 0 0 5px 0;
     text-align: center;
     font-size: 1em;
     font-weight: bold;
 }
-#winners-list { margin: 0; padding-left: 20px; font-size: 0.9em; }
+
+#winners-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.9em;
+}
 
 /* --- 5. Popups & Modals --- */
 #popup-menu {
@@ -147,11 +158,12 @@
     border-radius: 5px;
     padding: 5px;
     /* High Z-Index to stay on top of path highlights */
-    z-index: 200; 
+    z-index: 200;
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+
 #popup-menu button {
     width: 100%;
     padding: 10px 5px;
@@ -161,19 +173,36 @@
     border: none;
     border-radius: 3px;
 }
-#popup-move { background-color: #4CAF50; color: white; }
-#popup-select-instead { background-color: #2196F3; color: white; }
-#popup-cancel { background-color: #f44336; color: white; }
+
+#popup-move {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#popup-select-instead {
+    background-color: #2196F3;
+    color: white;
+}
+
+#popup-cancel {
+    background-color: #f44336;
+    color: white;
+}
 
 #modal-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;
 }
+
 #post-move-popup {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     background: #fff;
     border: 2px solid #444;
@@ -182,12 +211,17 @@
     z-index: 101;
     text-align: center;
 }
-#post-move-popup h3 { margin-top: 0; }
+
+#post-move-popup h3 {
+    margin-top: 0;
+}
+
 #post-move-popup .button-group {
     display: flex;
     gap: 10px;
     justify-content: center;
 }
+
 #post-move-popup button {
     font-size: 16px;
     padding: 10px 15px;
@@ -196,5 +230,11 @@
     border: none;
     color: white;
 }
-#repeat-turn-btn { background-color: #2196F3; }
-#end-turn-btn { background-color: #757575; }
+
+#repeat-turn-btn {
+    background-color: #2196F3;
+}
+
+#end-turn-btn {
+    background-color: #757575;
+}

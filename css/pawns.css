@@ -16,10 +16,21 @@
 }
 
 /* --- 2. Team Colors (Radial Gradients for 3D look) --- */
-.pawn-stack-red { background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%); }
-.pawn-stack-blue { background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%); }
-.pawn-stack-green { background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%); }
-.pawn-stack-yellow { background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%); }
+.pawn-stack-red {
+    background: radial-gradient(circle at 60% 30%, #ff7961, #e53935 80%);
+}
+
+.pawn-stack-blue {
+    background: radial-gradient(circle at 60% 30%, #63a4ff, #1e88e5 80%);
+}
+
+.pawn-stack-green {
+    background: radial-gradient(circle at 60% 30%, #76d275, #43a047 80%);
+}
+
+.pawn-stack-yellow {
+    background: radial-gradient(circle at 60% 30%, #ffff72, #fdd835 80%);
+}
 
 /* --- 3. Counter (Number on top) --- */
 .pawn-counter {
@@ -35,9 +46,17 @@
 
 /* --- 4. Selection Animation (Shimmer) --- */
 @keyframes pawn-shimmer {
-    0% { box-shadow: 0 0 2px 1px #00ffff; }
-    50% { box-shadow: 0 0 8px 3px #00ffff; }
-    100% { box-shadow: 0 0 2px 1px #00ffff; }
+    0% {
+        box-shadow: 0 0 2px 1px #00ffff;
+    }
+
+    50% {
+        box-shadow: 0 0 8px 3px #00ffff;
+    }
+
+    100% {
+        box-shadow: 0 0 2px 1px #00ffff;
+    }
 }
 
 .pawn-stack.selected-pawn {
@@ -50,11 +69,13 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    border: 2px solid rgba(0,0,0,0.5);
+    border: 2px solid rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
-    
+
     position: absolute;
-    z-index: 1000; /* Above everything */
-    
-    transition: transform 0.25s linear; /* Matches JS timing */
+    z-index: 1000;
+    /* Above everything */
+
+    transition: transform 0.25s linear;
+    /* Matches JS timing */
 }

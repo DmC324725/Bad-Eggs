@@ -379,20 +379,33 @@
         updateTurnDisplay();
     }
 
+    /** * Manually changes the turn index. Used by the < > buttons.
+     * @param {number} offset - +1 for Next, -1 for Previous
+     */
     function manualChangeTurn(offset) {
         if (isGameOver) return;
+
+        // * --- FIX: Clear selection when changing turns manually --- *
+        clearSelection();
+        hidePopup();
+
         let newIndex = turnIndex;
         let loopCount = 0;
+
+        // Loop to find the next valid player, skipping finished ones in Solo mode
         do {
             newIndex = (newIndex + offset + turnOrder.length) % turnOrder.length;
             const nextTeam = turnOrder[newIndex];
+
+            // If in solo mode and player is finished, skip them
             if (!isPairMode && finishedTeams[nextTeam]) {
                 loopCount++;
-                if (loopCount > 4) break;
+                if (loopCount > 4) break; // Safety break
                 continue;
             }
-            break;
+            break; // Found valid player
         } while (true);
+
         turnIndex = newIndex;
         updateTurnDisplay();
     }
