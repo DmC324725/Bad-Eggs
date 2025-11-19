@@ -658,3 +658,40 @@ body {
         max-width: 320px;
     }
 }
+
+/* === 9. BOARD TURN VISUALS (New) === */
+
+#game-board {
+    /* Add transition for smooth color swapping */
+    transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Red Turn Style */
+.board-turn-red {
+    /* Tint the wood background red */
+    background-color: #5e2121 !important; 
+    border-color: #e53935 !important;
+    /* Outer glow */
+    box-shadow: 0 0 20px 5px rgba(229, 57, 53, 0.6), inset 0 0 15px rgba(0,0,0,0.2) !important;
+}
+
+/* Blue Turn Style */
+.board-turn-blue {
+    background-color: #152e44 !important;
+    border-color: #1e88e5 !important;
+    box-shadow: 0 0 20px 5px rgba(30, 136, 229, 0.6), inset 0 0 15px rgba(0,0,0,0.2) !important;
+}
+
+/* Green Turn Style */
+.board-turn-green {
+    background-color: #1b3e1e !important;
+    border-color: #43a047 !important;
+    box-shadow: 0 0 20px 5px rgba(67, 160, 71, 0.6), inset 0 0 15px rgba(0,0,0,0.2) !important;
+}
+
+/* Yellow Turn Style */
+.board-turn-yellow {
+    background-color: #4e4a18 !important;
+    border-color: #fdd835 !important;
+    box-shadow: 0 0 20px 5px rgba(253, 216, 53, 0.6), inset 0 0 15px rgba(0,0,0,0.2) !important;
+}
