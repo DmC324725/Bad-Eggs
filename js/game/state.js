@@ -1,21 +1,22 @@
 /**
  * state.js
- * Manages the state of the game (whose turn it is, where pawns are, who won).
+ * Manages all mutable game state variables.
  */
 
+// Ensure namespace
 window.LudoGame = window.LudoGame || {};
 
 (function () {
+    // --- 3. GAME STATE VARIABLES ---
     LudoGame.State = {
-        isPairMode: false, // Game Mode
-        selectedPawnInfo: null, // Currently selected pawn data
-        globalMoveCounter: 0, // FIFO tracking
-        boardState: {}, // Holds pawn positions
-        turnIndex: 0, // Current player index
-        currentTurn: 'red', // Current player string
-        tempDestinationId: null, // Destination clicked by user
+        isPairMode: false,
+        selectedPawnInfo: null,
+        globalMoveCounter: 0,
+        boardState: {},
+        turnIndex: 0,
+        currentTurn: 'red', // Will be overwritten by init
+        tempDestinationId: null,
 
-        // Win condition flags
         finishedTeams: {
             'red': false,
             'blue': false,
@@ -31,31 +32,28 @@ window.LudoGame = window.LudoGame || {};
         winnersList: [],
         pairWinnerOrder: [],
 
-        // Locks
         isGameOver: false,
-        isAnimating: false,
+        isAnimating: false, // <--- Added this flag
+        isTurnOrderReversed: false, // <--- Added this flag
 
-        /**
-         * Resets all state variables to the start of a new game.
-         * Populates the boardState with initial pawn positions.
-         */
+        /** Resets state to default */
         reset: function () {
+            const Config = LudoGame.Config;
+
             this.globalMoveCounter = 0;
             this.boardState = {};
 
-            // Initialize grid cells
-            const rows = LudoGame.Config.ROWS;
-            const cols = LudoGame.Config.COLS;
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
+            // Grid
+            for (let r = 0; r < Config.ROWS; r++) {
+                for (let c = 0; c < Config.COLS; c++) {
                     this.boardState[`cell-${r}-${c}`] = [];
                 }
             }
             this.boardState['off-board-area'] = [];
 
-            // Place pawns in home bases
+            // Pawns
             ['red', 'blue', 'green', 'yellow'].forEach(team => {
-                const homeBaseId = LudoGame.Config.HOME_BASE_MAP[team];
+                const homeBaseId = Config.HOME_BASE_MAP[team];
                 for (let i = 0; i < 4; i++) {
                     const pawn = {
                         id: `${team[0]}${i}`,
@@ -66,7 +64,7 @@ window.LudoGame = window.LudoGame || {};
                 }
             });
 
-            // Reset flags
+            // Flags
             this.finishedTeams = {
                 'red': false,
                 'blue': false,
@@ -83,10 +81,12 @@ window.LudoGame = window.LudoGame || {};
             this.pairWinnerOrder = [];
             this.isGameOver = false;
             this.isAnimating = false;
+            this.isTurnOrderReversed = false;
+
             this.selectedPawnInfo = null;
             this.tempDestinationId = null;
             this.turnIndex = 0;
-            this.currentTurn = LudoGame.Config.TURN_ORDER[0];
+            this.currentTurn = Config.TURN_ORDER[0];
         }
     };
 })();

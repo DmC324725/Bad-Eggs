@@ -238,3 +238,17 @@
 #end-turn-btn {
     background-color: #757575;
 }
+
+#player-count-select {
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+#player-count-select:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

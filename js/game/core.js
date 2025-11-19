@@ -6,16 +6,17 @@
 window.LudoGame = window.LudoGame || {};
 
 (function () {
-    const State = LudoGame.State;
-    const Config = LudoGame.Config;
-    const UI = LudoGame.UI;
-    const Audio = LudoGame.Audio;
-    const Utils = LudoGame.Utils;
+    // Shorthand references to other modules
+    // Note: We access them inside functions to ensure they are loaded
 
     LudoGame.Core = {
 
         /** Selects a pawn when user clicks a cell */
         selectCell: function (cell) {
+            const State = LudoGame.State;
+            const Utils = LudoGame.Utils;
+            const UI = LudoGame.UI;
+
             const id = cell.id;
             if (id === 'off-board-area') return;
 
@@ -40,6 +41,9 @@ window.LudoGame = window.LudoGame || {};
         },
 
         clearSelection: function () {
+            const State = LudoGame.State;
+            const UI = LudoGame.UI;
+
             if (State.selectedPawnInfo) {
                 const oldId = State.selectedPawnInfo.fromContainerId;
                 State.selectedPawnInfo = null;
@@ -50,10 +54,20 @@ window.LudoGame = window.LudoGame || {};
 
         /** Calculates next turn based on rules */
         advanceTurn: function () {
+            const State = LudoGame.State;
+            const Config = LudoGame.Config;
+            const UI = LudoGame.UI;
+
             if (State.isGameOver) return;
 
             do {
-                State.turnIndex = (State.turnIndex + 1) % Config.TURN_ORDER.length;
+                // Handle Reversal
+                if (State.isTurnOrderReversed) {
+                    State.turnIndex = (State.turnIndex - 1 + Config.TURN_ORDER.length) % Config.TURN_ORDER.length;
+                } else {
+                    State.turnIndex = (State.turnIndex + 1) % Config.TURN_ORDER.length;
+                }
+
                 const next = Config.TURN_ORDER[State.turnIndex];
 
                 if (State.isPairMode && State.teamsToSkip[next]) {
@@ -72,6 +86,10 @@ window.LudoGame = window.LudoGame || {};
 
         /** Handles manual previous/next buttons */
         manualTurnChange: function (offset) {
+            const State = LudoGame.State;
+            const Config = LudoGame.Config;
+            const UI = LudoGame.UI;
+
             if (State.isGameOver) return;
             this.clearSelection();
             UI.hidePopup();
@@ -94,107 +112,127 @@ window.LudoGame = window.LudoGame || {};
             UI.updateTurn();
         },
 
-        /** The Big One: Execute Move, Animate, Kill, Check Win */
+        /** * The Big One: Execute Move, Animate, Kill, Check Win 
+         * Updated with Try/Catch for robustness
+         */
         performMove: async function (fromId, toId, pawn) {
-            // Lock
-            State.isAnimating = true;
-            UI.elements.modeBtn.disabled = true;
-            if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
+            const State = LudoGame.State;
+            const Config = LudoGame.Config;
+            const UI = LudoGame.UI;
+            const Audio = LudoGame.Audio;
+            const Utils = LudoGame.Utils;
 
-            // Path
-            const path = Config.TEAM_PATHS[pawn.team];
-            const startIdx = path.indexOf(fromId);
-            const endIdx = path.indexOf(toId);
-            const steps = path.slice(startIdx + 1, endIdx + 1);
+            try {
+                // 1. Lock Board
+                State.isAnimating = true;
+                UI.elements.modeBtn.disabled = true;
+                const pSelect = document.getElementById('player-count-select');
+                if(pSelect) pSelect.disabled = true;
+                if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
 
-            // Visual Move (Start)
-            // Remove from start stack data immediately for visual logic
-            State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
-            UI.renderContainer(fromId);
+                // 2. Calculate Path
+                const path = Config.TEAM_PATHS[pawn.team];
+                const startIdx = path.indexOf(fromId);
+                const endIdx = path.indexOf(toId);
+                const steps = path.slice(startIdx + 1, endIdx + 1);
 
-            // Animate
-            await UI.animateMove(pawn.team, fromId, steps);
+                // 3. Visual Move (Start)
+                // Remove from start stack data immediately for visual logic
+                State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
+                UI.renderContainer(fromId);
 
-            // Update Data (End)
-            pawn.arrival = State.globalMoveCounter++;
-            State.boardState[toId].push(pawn);
+                // 4. Animate (Yield to UI)
+                await UI.animateMove(pawn.team, fromId, steps);
 
-            // Logic
-            let didFinishTurn = false;
-            const isSafe = Config.SPECIAL_BLOCKS.includes(toId);
-            const isOff = toId === 'off-board-area';
+                // 5. Update Data (End)
+                pawn.arrival = State.globalMoveCounter++;
+                State.boardState[toId].push(pawn);
 
-            // Kill?
-            if (!isSafe && !isOff) {
-                const destPawns = State.boardState[toId];
-                const victims = destPawns.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
+                // 6. Logic
+                let didFinishTurn = false;
+                const isSafe = Config.SPECIAL_BLOCKS.includes(toId);
+                const isOff = toId === 'off-board-area';
 
-                if (victims.length > 0) {
-                    const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
-                    const home = Config.HOME_BASE_MAP[victim.team];
+                // Kill?
+                if (!isSafe && !isOff) {
+                    const destPawns = State.boardState[toId];
+                    const victims = destPawns.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
 
-                    State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
-                    State.boardState[home].push(victim);
+                    if (victims.length > 0) {
+                        const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
+                        const home = Config.HOME_BASE_MAP[victim.team];
 
-                    Audio.trigger('kill');
-                    setTimeout(() => Audio.trigger('return'), 400);
+                        State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
+                        State.boardState[home].push(victim);
+
+                        Audio.trigger('kill');
+                        setTimeout(() => Audio.trigger('return'), 400);
+                    }
                 }
-            }
 
-            // Win?
-            if (isOff) {
-                Audio.trigger('finish');
-                // Check if team done
-                const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
+                // Win?
+                if (isOff) {
+                    Audio.trigger('finish');
+                    // Check if team done
+                    const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
 
-                if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
-                    didFinishThisTurn = true; // Flag to auto-end turn
-                    State.finishedTeams[pawn.team] = true;
+                    if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
+                        didFinishTurn = true; // Flag to auto-end turn
+                        State.finishedTeams[pawn.team] = true;
 
-                    // Win Logic (Pair vs Solo)
-                    if (State.isPairMode) {
-                        State.teamsToSkip[pawn.team] = true;
-                        const partner = Utils.getTeammate(pawn.team);
-                        if (State.finishedTeams[partner]) {
-                            State.isGameOver = true;
-                            // Add both to winners
-                            const pairName = (pawn.team === 'red' || pawn.team === 'green') ? "Red/Green" : "Blue/Yellow";
-                            if (!State.pairWinnerOrder.includes(pairName)) State.pairWinnerOrder.push(pairName);
-                            // Add other pair as 2nd
-                            const other = pairName === "Red/Green" ? "Blue/Yellow" : "Red/Green";
-                            if (!State.pairWinnerOrder.includes(other)) State.pairWinnerOrder.push(other);
+                        // Win Logic (Pair vs Solo)
+                        if (State.isPairMode) {
+                            State.teamsToSkip[pawn.team] = true;
+                            const partner = Utils.getTeammate(pawn.team);
+                            if (State.finishedTeams[partner]) {
+                                State.isGameOver = true;
+                                // Add both to winners
+                                const pairName = (pawn.team === 'red' || pawn.team === 'green') ? "Red/Green" : "Blue/Yellow";
+                                if (!State.pairWinnerOrder.includes(pairName)) State.pairWinnerOrder.push(pairName);
+                                // Add other pair as 2nd
+                                const other = pairName === "Red/Green" ? "Blue/Yellow" : "Red/Green";
+                                if (!State.pairWinnerOrder.includes(other)) State.pairWinnerOrder.push(other);
 
-                            UI.updateWinners();
-                            Audio.trigger('gameover');
-                        }
-                    } else {
-                        State.winnersList.push(pawn.team);
-                        UI.updateWinners();
-                        if (State.winnersList.length === 3) {
-                            State.isGameOver = true;
-                            const last = Config.TURN_ORDER.find(t => !State.finishedTeams[t]);
-                            if (last) {
-                                State.winnersList.push(last);
-                                State.finishedTeams[last] = true;
                                 UI.updateWinners();
+                                Audio.trigger('gameover');
                             }
-                            Audio.trigger('gameover');
+                        } else {
+                            State.winnersList.push(pawn.team);
+                            UI.updateWinners();
+                            if (State.winnersList.length === 3) {
+                                State.isGameOver = true;
+                                const last = Config.TURN_ORDER.find(t => !State.finishedTeams[t]);
+                                if (last) {
+                                    State.winnersList.push(last);
+                                    State.finishedTeams[last] = true;
+                                    UI.updateWinners();
+                                }
+                                Audio.trigger('gameover');
+                            }
                         }
                     }
                 }
-            }
 
-            // Unlock & Render
-            UI.renderBoard();
-            State.isAnimating = false;
-            if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
+                // 7. Unlock & Render
+                UI.renderBoard();
 
-            if (State.isGameOver) {
-                console.log("Game Over");
-            } else if (didFinishTurn) {
-                this.advanceTurn();
-            } else {
+                if (State.isGameOver) {
+                    console.log("Game Over");
+                } else if (didFinishTurn) {
+                    this.advanceTurn();
+                } else {
+                    // Show popup to end or repeat
+                    UI.showPostMove();
+                }
+
+            } catch (error) {
+                console.error("Move Failed:", error);
+                // Recovery mechanism: Unlock board if animation crashes
+                UI.renderBoard();
                 UI.showPostMove();
+            } finally {
+                State.isAnimating = false;
+                if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
             }
         }
     };

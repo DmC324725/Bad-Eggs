@@ -114,13 +114,16 @@ window.LudoGame = window.LudoGame || {};
         },
 
         /** Update Text and Colors for Turn */
-        updateTurn: function () {
+        updateTurn: function() {
             const turn = LudoGame.State.currentTurn;
             els.turnDisplay.innerText = turn.toUpperCase();
             els.turnDisplay.style.backgroundColor = LudoGame.Config.TEAM_COLORS[turn];
-
+            
             els.board.classList.remove('board-turn-red', 'board-turn-blue', 'board-turn-green', 'board-turn-yellow');
             els.board.classList.add(`board-turn-${turn}`);
+    
+            // Optional: You could add logic here to grey out Home Bases of inactive players
+            // based on LudoGame.State.activeTeams if you wanted extra visual cues.
         },
 
         /** Update Winner List */
