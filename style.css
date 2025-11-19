@@ -776,3 +776,25 @@ body {
 .path-highlight-yellow {
     border-color: #fdd835 !important;
 }
+
+/* === NEW: Animation Styles === */
+.floating-pawn {
+    /* Same dimensions as a regular pawn stack */
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+
+    /* Positioning */
+    position: absolute;
+    z-index: 1000;
+    /* Above everything */
+    pointer-events: none;
+    /* Don't block clicks while moving */
+
+    /* Smooth movement */
+    transition: all 0.2s linear;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    /* Lifted effect */
+}

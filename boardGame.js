@@ -3,6 +3,73 @@
 // variables won't conflict with the dice roller's variables.
 (function () {
 
+    // --- 0. AUDIO SETUP (Tone.js) ---
+    const moveSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.01,
+        octaves: 2,
+        envelope: {
+            attack: 0.001,
+            decay: 0.1,
+            sustain: 0
+        }
+    }).toDestination();
+    const killSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 4,
+        envelope: {
+            attack: 0.001,
+            decay: 0.2,
+            sustain: 0
+        }
+    }).toDestination();
+    const successSynth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+            type: "triangle"
+        },
+        envelope: {
+            attack: 0.02,
+            decay: 0.1,
+            sustain: 0.1,
+            release: 1
+        }
+    }).toDestination();
+    const resetSynth = new Tone.NoiseSynth({
+        noise: {
+            type: 'pink'
+        },
+        envelope: {
+            attack: 0.01,
+            decay: 0.3,
+            sustain: 0
+        }
+    }).toDestination();
+
+    function triggerSound(type) {
+        if (Tone.context.state !== 'running') Tone.start(); // Ensure audio is ready
+        const now = Tone.now();
+        switch (type) {
+            case 'move':
+                moveSynth.triggerAttackRelease("C5", "8n", now);
+                break;
+            case 'kill':
+                killSynth.triggerAttackRelease("G2", "8n", now);
+                break;
+            case 'return':
+                moveSynth.triggerAttackRelease("A3", "16n", now);
+                moveSynth.triggerAttackRelease("E3", "16n", now + 0.1);
+                break;
+            case 'finish':
+                successSynth.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
+                break;
+            case 'gameover':
+                successSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n", now);
+                break;
+            case 'reset':
+                resetSynth.triggerAttackRelease("8n", now);
+                break;
+        }
+    }
+
     // =========================================================================
     // 1. DOM ELEMENTS
     // =========================================================================
@@ -115,6 +182,7 @@
     let pairWinnerOrder = [];
     let isGameOver = false;
     let isTurnOrderReversed = false;
+    let isAnimating = false;
 
 
     // =========================================================================
@@ -437,6 +505,7 @@
 
     function resetGame() {
         console.log("Resetting game...");
+        triggerSound('reset');
         initializeBoardState();
         renderBoard();
 
@@ -453,12 +522,95 @@
         isTurnOrderReversed = false;
     }
 
-    function performMove(fromId, toId, pawn) {
+    // --- ANIMATION HELPERS ---
+
+    /** Plays a specific sound element */
+    function playGameSound(id) {
+        const audio = document.getElementById(id);
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.warn(e));
+        }
+    }
+
+    // --- ANIMATION HELPERS ---
+    function getElementCoords(element) {
+        const gameRect = positionReferenceContainer.getBoundingClientRect();
+        const elemRect = element.getBoundingClientRect();
+        // Center the 26px pawn inside the cell (13 is half of 26)
+        const x = (elemRect.left - gameRect.left) + (elemRect.width / 2) - 13;
+        const y = (elemRect.top - gameRect.top) + (elemRect.height / 2) - 13;
+        return {
+            x,
+            y
+        };
+    }
+
+    async function animatePawnMovement(team, startId, stepIds) {
+        const startCell = document.getElementById(startId);
+        const startCoords = getElementCoords(startCell);
+
+        // Create floating pawn
+        const floater = document.createElement('div');
+        floater.classList.add('floating-pawn', `pawn-stack-${team}`);
+        floater.style.left = `${startCoords.x}px`;
+        floater.style.top = `${startCoords.y}px`;
+
+        // Add counter "1"
+        const counter = document.createElement('div');
+        counter.classList.add('pawn-counter');
+        counter.innerText = "1";
+        floater.appendChild(counter);
+
+        positionReferenceContainer.appendChild(floater);
+        floater.offsetHeight; // Trigger layout
+
+        // Step through path
+        for (const stepId of stepIds) {
+            const targetCell = document.getElementById(stepId);
+            const targetCoords = getElementCoords(targetCell);
+
+            triggerSound('move'); // Sound on every step
+
+            floater.style.left = `${targetCoords.x}px`;
+            floater.style.top = `${targetCoords.y}px`;
+
+            await new Promise(resolve => setTimeout(resolve, 250)); // Wait for CSS transition
+        }
+
+        floater.remove();
+    }
+
+    // --- UPDATED MOVE FUNCTION ---
+    async function performMove(fromId, toId, pawn) {
+        // 1. Lock Board
+        isAnimating = true; // Lock clicks
         modeToggleBtn.disabled = true;
+        if (popupMoveBtn) popupMoveBtn.disabled = true;
+
         let didFinishThisTurn = false;
 
+        // 2. Calculate Path
+        const path = TEAM_PATHS[pawn.team];
+        const startIndex = path.indexOf(fromId);
+        const endIndex = path.indexOf(toId);
+        const stepsToTravel = path.slice(startIndex + 1, endIndex + 1);
+
+        // 3. Remove Visual from Start
+        boardState[fromId] = boardState[fromId].filter(p => p.id !== pawn.id);
+        renderContainer(fromId);
+
+        // 4. Animate (Wait for this to finish!)
+        await animatePawnMovement(pawn.team, fromId, stepsToTravel);
+
+        // 5. Update Data at Destination
+        pawn.arrival = globalMoveCounter++;
+        boardState[toId].push(pawn);
+
+        // 6. Kill Logic
         const isSpecial = specialBlocks.includes(toId);
         const isOffBoard = toId === 'off-board-area';
+
         if (!isSpecial && !isOffBoard) {
             const pawnsInDest = boardState[toId];
             const potentialVictims = pawnsInDest.filter(p => p.team !== pawn.team && !isTeammate(p.team, pawn.team));
@@ -466,59 +618,66 @@
             if (potentialVictims.length > 0) {
                 const victim = potentialVictims.sort((a, b) => a.arrival - b.arrival)[0];
                 const homeBaseId = homeBaseMap[victim.team];
+
                 boardState[toId] = boardState[toId].filter(p => p.id !== victim.id);
                 boardState[homeBaseId].push(victim);
+
+                triggerSound('kill');
+                setTimeout(() => triggerSound('return'), 400);
             }
         }
 
-        boardState[fromId] = boardState[fromId].filter(p => p.id !== pawn.id);
-        pawn.arrival = globalMoveCounter++;
-        boardState[toId].push(pawn);
+        // 7. Win Logic
+        if (toId === 'off-board-area') {
+            triggerSound('finish');
 
-        if (toId === 'off-board-area' && !finishedTeams[pawn.team]) {
-            const teamPawnsOffBoard = boardState['off-board-area'].filter(p => p.team === pawn.team);
+            if (!finishedTeams[pawn.team]) {
+                const teamPawnsOffBoard = boardState['off-board-area'].filter(p => p.team === pawn.team);
+                if (teamPawnsOffBoard.length === 4) {
+                    didFinishThisTurn = true;
+                    finishedTeams[pawn.team] = true;
 
-            if (teamPawnsOffBoard.length === 4) {
-                didFinishThisTurn = true;
-                finishedTeams[pawn.team] = true;
-
-                if (isPairMode) {
-                    teamsToSkip[pawn.team] = true;
-                    console.log(`${pawn.team.toUpperCase()} has finished (Pair Mode)`);
-                    const teammate = getTeammate(pawn.team);
-                    if (finishedTeams[teammate]) {
-                        isGameOver = true;
-                        const pairName = (pawn.team === 'red' || pawn.team === 'green') ? "Red/Green" : "Blue/Yellow";
-                        if (!pairWinnerOrder.includes(pairName)) pairWinnerOrder.push(pairName);
-                        const otherPairName = (pairName === "Red/Green") ? "Blue/Yellow" : "Red/Green";
-                        if (!pairWinnerOrder.includes(otherPairName)) pairWinnerOrder.push(otherPairName);
-                        updateWinnersDisplay();
-                    }
-                } else {
-                    console.log(`${pawn.team.toUpperCase()} has finished (Solo Mode)`);
-                    winnersList.push(pawn.team);
-                    updateWinnersDisplay();
-
-                    if (winnersList.length === 3) {
-                        isGameOver = true;
-                        const lastTeam = turnOrder.find(t => !finishedTeams[t]);
-                        if (lastTeam) {
-                            winnersList.push(lastTeam);
-                            finishedTeams[lastTeam] = true;
+                    if (isPairMode) {
+                        teamsToSkip[pawn.team] = true;
+                        const teammate = getTeammate(pawn.team);
+                        if (finishedTeams[teammate]) {
+                            isGameOver = true;
+                            // (Update pairWinnerOrder logic here...)
+                            const pairName = (pawn.team === 'red' || pawn.team === 'green') ? "Red/Green" : "Blue/Yellow";
+                            if (!pairWinnerOrder.includes(pairName)) pairWinnerOrder.push(pairName);
+                            const otherPairName = (pairName === "Red/Green") ? "Blue/Yellow" : "Red/Green";
+                            if (!pairWinnerOrder.includes(otherPairName)) pairWinnerOrder.push(otherPairName);
                             updateWinnersDisplay();
+                            triggerSound('gameover');
+                        }
+                    } else {
+                        winnersList.push(pawn.team);
+                        updateWinnersDisplay();
+                        if (winnersList.length === 3) {
+                            isGameOver = true;
+                            // (Update lastTeam logic here...)
+                            const lastTeam = turnOrder.find(t => !finishedTeams[t]);
+                            if (lastTeam) {
+                                winnersList.push(lastTeam);
+                                finishedTeams[lastTeam] = true;
+                                updateWinnersDisplay();
+                            }
+                            triggerSound('gameover');
                         }
                     }
                 }
             }
         }
 
+        // 8. Unlock & Final Render
         renderBoard();
+        isAnimating = false; // Unlock clicks
+        if (popupMoveBtn) popupMoveBtn.disabled = false;
 
         if (isGameOver) {
             console.log("Game has ended. Please reset.");
         } else if (didFinishThisTurn) {
             advanceTurn();
-            console.log("Player finished, auto-ending turn.");
         } else {
             showPostMovePopup();
         }
@@ -577,7 +736,7 @@
 
     // MAIN GAME CLICK LISTENER
     boardGameBody.addEventListener('click', (event) => {
-        if (isGameOver || !postMovePopup.classList.contains('hidden')) {
+        if (isGameOver || isAnimating || !postMovePopup.classList.contains('hidden')) {
             return;
         }
 
