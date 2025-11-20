@@ -36,12 +36,55 @@ window.LudoGame = window.LudoGame || {};
         isAnimating: false, // <--- Added this flag
         isTurnOrderReversed: false, // <--- Added this flag
 
+        // NEW: History Stack
+        moveHistory: [],
+
+        /** Saves a snapshot of the current game data */
+        saveHistory: function () {
+            const snapshot = {
+                // JSON stringify/parse is a simple way to deep-clone data objects
+                boardState: JSON.parse(JSON.stringify(this.boardState)),
+                finishedTeams: JSON.parse(JSON.stringify(this.finishedTeams)),
+                teamsToSkip: JSON.parse(JSON.stringify(this.teamsToSkip)),
+                winnersList: [...this.winnersList],
+                pairWinnerOrder: [...this.pairWinnerOrder],
+
+                // Primitives
+                globalMoveCounter: this.globalMoveCounter,
+                turnIndex: this.turnIndex,
+                currentTurn: this.currentTurn,
+                isGameOver: this.isGameOver
+            };
+            this.moveHistory.push(snapshot);
+        },
+
+        /** Restores the last snapshot. Returns true if successful. */
+        undo: function () {
+            if (this.moveHistory.length === 0) return false;
+
+            const snapshot = this.moveHistory.pop();
+
+            // Restore data
+            this.boardState = snapshot.boardState;
+            this.finishedTeams = snapshot.finishedTeams;
+            this.teamsToSkip = snapshot.teamsToSkip;
+            this.winnersList = snapshot.winnersList;
+            this.pairWinnerOrder = snapshot.pairWinnerOrder;
+            this.globalMoveCounter = snapshot.globalMoveCounter;
+            this.turnIndex = snapshot.turnIndex;
+            this.currentTurn = snapshot.currentTurn;
+            this.isGameOver = snapshot.isGameOver;
+
+            return true;
+        },
+
         /** Resets state to default */
         reset: function () {
             const Config = LudoGame.Config;
 
             this.globalMoveCounter = 0;
             this.boardState = {};
+            this.moveHistory = [];
 
             // Grid
             for (let r = 0; r < Config.ROWS; r++) {
