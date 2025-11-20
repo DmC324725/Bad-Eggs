@@ -84,6 +84,34 @@ window.LudoGame = window.LudoGame || {};
             UI.updateTurn();
         },
 
+        /** Reverses the last move by restoring state */
+        reverseLastMove: function () {
+            const State = LudoGame.State;
+            const UI = LudoGame.UI;
+            const Audio = LudoGame.Audio;
+
+            if (State.isAnimating) return; // Don't undo while moving
+
+            const success = State.undo();
+            if (success) {
+                console.log("Move reversed.");
+
+                // Refresh UI
+                UI.renderBoard();
+                UI.updateTurn();
+                UI.updateWinners();
+
+                // Clear any selection to prevent weird states
+                this.clearSelection();
+                UI.hidePopup();
+
+                // Play a sound (using 'return' sound for feedback)
+                Audio.trigger('return');
+            } else {
+                console.log("No moves to undo.");
+            }
+        },
+
         /** Handles manual previous/next buttons */
         manualTurnChange: function (offset) {
             const State = LudoGame.State;
@@ -115,7 +143,7 @@ window.LudoGame = window.LudoGame || {};
         /** * The Big One: Execute Move, Animate, Kill, Check Win 
          * Updated with Try/Catch for robustness
          */
-        performMove: async function(fromId, toId, pawn) {
+        performMove: async function (fromId, toId, pawn) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             const UI = LudoGame.UI;
@@ -123,31 +151,34 @@ window.LudoGame = window.LudoGame || {};
             const Utils = LudoGame.Utils;
 
             try {
-                // 1. Lock Board
+                // 1. SAVE HISTORY (New)
+                State.saveHistory();
+
+                // 2. Lock Board
                 State.isAnimating = true;
                 UI.elements.modeBtn.disabled = true;
                 const pSelect = document.getElementById('player-count-select');
-                if(pSelect) pSelect.disabled = true;
+                if (pSelect) pSelect.disabled = true;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
 
-                // 2. Calculate Path
+                // 3. Calculate Path
                 const path = Config.TEAM_PATHS[pawn.team];
                 const startIdx = path.indexOf(fromId);
                 const endIdx = path.indexOf(toId);
                 const steps = path.slice(startIdx + 1, endIdx + 1);
 
-                // 3. Visual Move (Start)
+                // 4. Visual Move (Start)
                 State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
-                UI.renderContainer(fromId); 
+                UI.renderContainer(fromId);
 
-                // 4. Animate
+                // 5. Animate
                 await UI.animateMove(pawn.team, fromId, steps);
 
-                // 5. Update Data (End)
+                // 6. Update Data (End)
                 pawn.arrival = State.globalMoveCounter++;
                 State.boardState[toId].push(pawn);
-                
-                // 6. Kill Logic
+
+                // 7. Kill Logic
                 const isSpecial = Config.SPECIAL_BLOCKS.includes(toId);
                 const isOff = toId === 'off-board-area';
 
@@ -155,27 +186,27 @@ window.LudoGame = window.LudoGame || {};
                 if (!isSpecial && !isOff) {
                     const pawnsInDest = State.boardState[toId];
                     const victims = pawnsInDest.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
-                    
+
                     if (victims.length > 0) {
-                        const victim = victims.sort((a,b) => a.arrival - b.arrival)[0];
+                        const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
                         const home = Config.HOME_BASE_MAP[victim.team];
-                        
+
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
-                        
+
                         Audio.trigger('kill');
-                        setTimeout(() => Audio.trigger('return'), 400); 
+                        setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
-                
-                // 7. Win Logic
+
+                // 8. Win Logic
                 if (isOff) {
                     Audio.trigger('finish');
                     const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
-                    
+
                     if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
                         State.finishedTeams[pawn.team] = true;
-                        
+
                         if (State.isPairMode) {
                             State.teamsToSkip[pawn.team] = true;
                             const partner = Utils.getTeammate(pawn.team);
@@ -206,9 +237,9 @@ window.LudoGame = window.LudoGame || {};
                     }
                 }
 
-                // 8. Unlock & Render
+                // 9. Unlock & Render
                 UI.renderBoard();
-                
+
                 if (State.isGameOver) {
                     console.log("Game Over");
                 } else {

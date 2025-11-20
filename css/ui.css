@@ -252,3 +252,15 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+#undo-btn {
+    background-color: #4b5563;
+    /* Dark Gray */
+    color: white;
+    border: none;
+    height: 40px;
+}
+
+#undo-btn:hover {
+    background-color: #374151;
+}

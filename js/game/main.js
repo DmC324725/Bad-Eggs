@@ -3,7 +3,7 @@
  * Entry Point. Attaches listeners and starts the game.
  */
 
- (function() {
+(function () {
     const Core = LudoGame.Core;
     const UI = LudoGame.UI;
     const State = LudoGame.State;
@@ -16,7 +16,7 @@
     const modeDisplay = document.getElementById('mode-display');
     const resetBtn = document.getElementById('reset-btn');
     const playerCountSelect = document.getElementById('player-count-select');
-    
+
     const popupMoveBtn = document.getElementById('popup-move');
     const popupSelectBtn = document.getElementById('popup-select-instead');
     const popupCancelBtn = document.getElementById('popup-cancel');
@@ -24,8 +24,15 @@
     const endTurnBtn = document.getElementById('end-turn-btn');
     const prevTurnBtn = document.getElementById('prev-turn-btn');
     const nextTurnBtn = document.getElementById('next-turn-btn');
+    const undoBtn = document.getElementById('undo-btn');
 
     // --- LISTENERS ---
+
+    if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+            LudoGame.Core.reverseLastMove();
+        });
+    }
 
     // 1. Player Count Change
     if (playerCountSelect) {
@@ -38,10 +45,10 @@
     // 2. Toggle Game Mode
     modeToggleBtn.addEventListener('click', () => {
         State.isPairMode = !State.isPairMode;
-        
+
         // Update Text
         UI.elements.modeDisplay.innerText = State.isPairMode ? 'Team Mode' : 'Solo Mode';
-        
+
         // Handle Player Count Restrictions
         if (State.isPairMode) {
             // Team Mode: Force 4 players and lock dropdown
@@ -64,7 +71,7 @@
 
         console.log("Reset");
         LudoGame.Audio.trigger('reset');
-        
+
         // Core Reset
         LudoGame.State.reset();
         LudoGame.UI.renderBoard();
@@ -72,23 +79,26 @@
         LudoGame.Core.clearSelection();
         LudoGame.UI.hidePopup();
         LudoGame.UI.hidePostMove();
-        
+
         // Unlock Controls
         document.getElementById('mode-toggle').disabled = false;
-        
+
         // Only unlock player selector if we are in Solo Mode
         if (playerCountSelect) {
             playerCountSelect.disabled = State.isPairMode;
         }
-        
+
         LudoGame.UI.updateWinners();
     });
 
     // --- POPUP & MODAL LISTENERS ---
-    
+
     document.getElementById('popup-move').addEventListener('click', () => {
         if (State.selectedPawnInfo && State.tempDestinationId) {
-            const { fromContainerId, pawn } = State.selectedPawnInfo;
+            const {
+                fromContainerId,
+                pawn
+            } = State.selectedPawnInfo;
             Core.clearSelection();
             UI.hidePopup();
             Core.performMove(fromContainerId, State.tempDestinationId, pawn);
@@ -115,7 +125,7 @@
         if (State.isGameOver || State.isAnimating) {
             return;
         }
-        
+
         const clickedContainer = event.target.closest('.pawn-container');
         if (event.target.closest('.dice-roller') || event.target.closest('#popup-menu')) return;
         if (!clickedContainer) return;
@@ -126,7 +136,7 @@
             UI.hidePopup();
             const teamToPlay = Utils.getTeamToPlay();
             const hasPawn = State.boardState[containerId].some(p => p.team === teamToPlay);
-            if(hasPawn) Core.selectCell(clickedContainer);
+            if (hasPawn) Core.selectCell(clickedContainer);
         } else {
             const fromId = State.selectedPawnInfo.fromContainerId;
             if (fromId === containerId) {
@@ -134,10 +144,10 @@
                 UI.hidePopup();
                 return;
             }
-            
+
             if (State.tempDestinationId) {
                 const old = document.getElementById(State.tempDestinationId);
-                if(old) old.classList.remove('target-cell');
+                if (old) old.classList.remove('target-cell');
             }
 
             const team = State.selectedPawnInfo.pawn.team;
@@ -149,7 +159,7 @@
             if (end === -1 || steps <= 0 || steps > 12) return;
 
             State.tempDestinationId = containerId;
-            
+
             let showSelect = false;
             if (containerId !== 'off-board-area') {
                 const teamToPlay = Utils.getTeamToPlay();
