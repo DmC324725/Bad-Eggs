@@ -58,6 +58,10 @@
 
     // 3. Reset Button
     document.getElementById('reset-btn').addEventListener('click', () => {
+        if (!confirm("Are you sure you want to reset? All current progress will be lost.")) {
+            return;
+        }
+
         console.log("Reset");
         LudoGame.Audio.trigger('reset');
         
