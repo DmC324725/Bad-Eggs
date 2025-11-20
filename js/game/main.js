@@ -107,22 +107,12 @@
 
     document.getElementById('popup-cancel').addEventListener('click', UI.hidePopup);
 
-    document.getElementById('repeat-turn-btn').addEventListener('click', () => {
-        UI.hidePostMove();
-        console.log("Turn Repeated");
-    });
-    
-    document.getElementById('end-turn-btn').addEventListener('click', () => {
-        UI.hidePostMove();
-        Core.advanceTurn();
-    });
-
     document.getElementById('prev-turn-btn').addEventListener('click', () => Core.manualTurnChange(-1));
     document.getElementById('next-turn-btn').addEventListener('click', () => Core.manualTurnChange(1));
 
     // --- MAIN BOARD CLICK ---
     boardGameBody.addEventListener('click', (event) => {
-        if (State.isGameOver || State.isAnimating || !UI.elements.postPopup.classList.contains('hidden')) {
+        if (State.isGameOver || State.isAnimating) {
             return;
         }
         

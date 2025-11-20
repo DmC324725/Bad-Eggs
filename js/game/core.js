@@ -115,7 +115,7 @@ window.LudoGame = window.LudoGame || {};
         /** * The Big One: Execute Move, Animate, Kill, Check Win 
          * Updated with Try/Catch for robustness
          */
-        performMove: async function (fromId, toId, pawn) {
+        performMove: async function(fromId, toId, pawn) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             const UI = LudoGame.UI;
@@ -137,71 +137,64 @@ window.LudoGame = window.LudoGame || {};
                 const steps = path.slice(startIdx + 1, endIdx + 1);
 
                 // 3. Visual Move (Start)
-                // Remove from start stack data immediately for visual logic
                 State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
-                UI.renderContainer(fromId);
+                UI.renderContainer(fromId); 
 
-                // 4. Animate (Yield to UI)
+                // 4. Animate
                 await UI.animateMove(pawn.team, fromId, steps);
 
                 // 5. Update Data (End)
                 pawn.arrival = State.globalMoveCounter++;
                 State.boardState[toId].push(pawn);
-
-                // 6. Logic
-                let didFinishTurn = false;
-                const isSafe = Config.SPECIAL_BLOCKS.includes(toId);
+                
+                // 6. Kill Logic
+                const isSpecial = Config.SPECIAL_BLOCKS.includes(toId);
                 const isOff = toId === 'off-board-area';
 
-                // Kill?
-                if (!isSafe && !isOff) {
-                    const destPawns = State.boardState[toId];
-                    const victims = destPawns.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
-
+                // FIX: Use 'isSpecial', not 'isSafe'
+                if (!isSpecial && !isOff) {
+                    const pawnsInDest = State.boardState[toId];
+                    const victims = pawnsInDest.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
+                    
                     if (victims.length > 0) {
-                        const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
+                        const victim = victims.sort((a,b) => a.arrival - b.arrival)[0];
                         const home = Config.HOME_BASE_MAP[victim.team];
-
+                        
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
-
+                        
                         Audio.trigger('kill');
-                        setTimeout(() => Audio.trigger('return'), 400);
+                        setTimeout(() => Audio.trigger('return'), 400); 
                     }
                 }
-
-                // Win?
+                
+                // 7. Win Logic
                 if (isOff) {
                     Audio.trigger('finish');
-                    // Check if team done
                     const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
-
+                    
                     if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
-                        didFinishTurn = true; // Flag to auto-end turn
                         State.finishedTeams[pawn.team] = true;
-
-                        // Win Logic (Pair vs Solo)
+                        
                         if (State.isPairMode) {
                             State.teamsToSkip[pawn.team] = true;
                             const partner = Utils.getTeammate(pawn.team);
                             if (State.finishedTeams[partner]) {
                                 State.isGameOver = true;
-                                // Add both to winners
                                 const pairName = (pawn.team === 'red' || pawn.team === 'green') ? "Red/Green" : "Blue/Yellow";
                                 if (!State.pairWinnerOrder.includes(pairName)) State.pairWinnerOrder.push(pairName);
-                                // Add other pair as 2nd
                                 const other = pairName === "Red/Green" ? "Blue/Yellow" : "Red/Green";
                                 if (!State.pairWinnerOrder.includes(other)) State.pairWinnerOrder.push(other);
-
                                 UI.updateWinners();
                                 Audio.trigger('gameover');
                             }
                         } else {
                             State.winnersList.push(pawn.team);
                             UI.updateWinners();
-                            if (State.winnersList.length === 3) {
+                            const totalPlayers = State.activeTeams.length; // Use active players count
+                            if (State.winnersList.length === totalPlayers - 1) {
                                 State.isGameOver = true;
-                                const last = Config.TURN_ORDER.find(t => !State.finishedTeams[t]);
+                                const last = Config.TURN_ORDER.find(t => State.activeTeams.includes(t) && !State.finishedTeams[t]);
                                 if (last) {
                                     State.winnersList.push(last);
                                     State.finishedTeams[last] = true;
@@ -213,23 +206,19 @@ window.LudoGame = window.LudoGame || {};
                     }
                 }
 
-                // 7. Unlock & Render
+                // 8. Unlock & Render
                 UI.renderBoard();
-
+                
                 if (State.isGameOver) {
                     console.log("Game Over");
-                } else if (didFinishTurn) {
-                    this.advanceTurn();
                 } else {
-                    // Show popup to end or repeat
-                    UI.showPostMove();
+                    // CHANGE: Always auto-advance turn immediately
+                    this.advanceTurn();
                 }
 
             } catch (error) {
                 console.error("Move Failed:", error);
-                // Recovery mechanism: Unlock board if animation crashes
                 UI.renderBoard();
-                UI.showPostMove();
             } finally {
                 State.isAnimating = false;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
