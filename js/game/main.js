@@ -198,5 +198,6 @@
     LudoGame.State.reset();
     LudoGame.UI.renderBoard();
     LudoGame.UI.updateTurn();
+    LudoGame.UI.updateRollButtonState();
 
 })();

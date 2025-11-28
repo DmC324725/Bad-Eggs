@@ -166,6 +166,47 @@ window.LudoGame = window.LudoGame || {};
             }
         },
 
+        // === NEW: RENDER MOVE BANK ===
+        renderMoveBank: function() {
+            const bankList = document.getElementById('move-bank-list');
+            const bankDisplay = document.getElementById('move-bank-display');
+            
+            if (!bankList || !bankDisplay) return; // Safety check
+
+            bankList.innerHTML = ''; // Clear list
+            
+            const bank = LudoGame.State.moveBank;
+            const selectedIdx = LudoGame.State.selectedBankIndex;
+
+            bank.forEach((val, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'bank-item';
+                btn.innerText = val;
+                
+                if (index === selectedIdx) btn.classList.add('selected');
+                
+                // We will add the click listener in the next step (Core logic)
+                
+                bankList.appendChild(btn);
+            });
+            
+            // Show/Hide container
+            if (bank.length > 0) {
+                bankDisplay.classList.remove('hidden');
+            } else {
+                bankDisplay.classList.add('hidden');
+            }
+        },
+        
+        updateRollButtonState: function() {
+            const btn = document.getElementById('roll-button');
+            if(!btn) return;
+            // Simple check for now, full logic coming in Step 2
+            const canRoll = LudoGame.State.pendingRolls > 0 && !LudoGame.State.isGameOver;
+            btn.disabled = !canRoll;
+            btn.innerText = canRoll ? `Roll (${LudoGame.State.pendingRolls})` : "Roll";
+        },
+
         // =====================================================================
         // 4. INFO DISPLAYS (Turn & Winners)
         // =====================================================================

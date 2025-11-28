@@ -17,11 +17,6 @@ window.LudoGame = window.LudoGame || {};
         currentTurn: 'red', // Will be overwritten by init
         tempDestinationId: null,
 
-        // --- NEW: Dice & Move State ---
-        moveBank: [], // Array of available moves (e.g., [6, 4])
-        selectedBankIndex: -1, // Index of the currently active move
-        pendingRolls: 1, // Rolls available to take (starts at 1)
-
         finishedTeams: {
             'red': false,
             'blue': false,
@@ -40,6 +35,11 @@ window.LudoGame = window.LudoGame || {};
         isGameOver: false,
         isAnimating: false, // <--- Added this flag
         isTurnOrderReversed: false, // <--- Added this flag
+
+        // --- NEW: Dice & Move State ---
+        moveBank: [], // Array of available moves (e.g., [6, 4])
+        selectedBankIndex: -1, // Index of the currently active move
+        pendingRolls: 1, // Rolls available to take (starts at 1)
 
         // NEW: History Stack
         moveHistory: [],
