@@ -120,6 +120,30 @@
     document.getElementById('prev-turn-btn').addEventListener('click', () => Core.manualTurnChange(-1));
     document.getElementById('next-turn-btn').addEventListener('click', () => Core.manualTurnChange(1));
 
+    // --- NEW: Background Music Logic ---
+    const musicBtn = document.getElementById('music-btn');
+    const bgMusic = document.getElementById('bg-music');
+
+    if (musicBtn && bgMusic) {
+        // Set initial volume (optional, 0.5 is 50%)
+        bgMusic.volume = 0.3; 
+
+        musicBtn.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    musicBtn.innerText = "🎵 On";
+                    musicBtn.classList.add('playing');
+                }).catch(error => {
+                    console.warn("Music play failed (user interaction needed):", error);
+                });
+            } else {
+                bgMusic.pause();
+                musicBtn.innerText = "🎵 Off";
+                musicBtn.classList.remove('playing');
+            }
+        });
+    }
+
     // --- MAIN BOARD CLICK ---
     boardGameBody.addEventListener('click', (event) => {
         if (State.isGameOver || State.isAnimating) {

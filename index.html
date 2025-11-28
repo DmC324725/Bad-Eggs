@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bad Eggs</title>
-    <link rel="icon" type="image/png" href="bad-eggs-icon.png">
+    <link rel="icon" type="image/png" href="assets/bad-eggs-icon.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 
@@ -39,9 +39,11 @@
                 </div>
             </div>
             <button id="undo-btn" title="Reverse Last Move">↩ Undo</button>
+            <button id="music-btn" title="Toggle Background Music">🎵 Off</button>
 
             <button id="reset-btn">Reset Game</button>
         </div>
+        <audio id="bg-music" src="assets/bg-music.mp3" loop></audio>
 
         <div class="status-panels">
             <div id="winners-area">

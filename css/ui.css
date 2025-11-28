@@ -264,3 +264,26 @@
 #undo-btn:hover {
     background-color: #374151;
 }
+
+/* Music Button */
+#music-btn {
+    font-size: 16px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #64748b; /* Slate Gray (Off) */
+    color: white;
+    transition: background-color 0.3s;
+    min-width: 80px;
+}
+
+#music-btn.playing {
+    background-color: #10b981; /* Emerald Green (On) */
+    border-color: #059669;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+#music-btn:hover {
+    opacity: 0.9;
+}
