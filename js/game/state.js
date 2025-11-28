@@ -17,6 +17,11 @@ window.LudoGame = window.LudoGame || {};
         currentTurn: 'red', // Will be overwritten by init
         tempDestinationId: null,
 
+        // --- NEW: Dice & Move State ---
+        moveBank: [], // Array of available moves (e.g., [6, 4])
+        selectedBankIndex: -1, // Index of the currently active move
+        pendingRolls: 1, // Rolls available to take (starts at 1)
+
         finishedTeams: {
             'red': false,
             'blue': false,
@@ -85,6 +90,11 @@ window.LudoGame = window.LudoGame || {};
             this.globalMoveCounter = 0;
             this.boardState = {};
             this.moveHistory = [];
+
+            // === NEW: Reset Bank ===
+            this.moveBank = [];
+            this.selectedBankIndex = -1;
+            this.pendingRolls = 1;
 
             // Grid
             for (let r = 0; r < Config.ROWS; r++) {

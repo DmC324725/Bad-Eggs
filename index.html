@@ -20,16 +20,17 @@
                 <button id="mode-toggle">Toggle Mode</button>
                 <p>Current Mode: <span id="mode-display">Solo</span></p>
             </div>
-        
+
             <div>
-                <select id="player-count-select" style="font-size: 16px; padding: 8px; border-radius: 5px; cursor: pointer;">
+                <select id="player-count-select"
+                    style="font-size: 16px; padding: 8px; border-radius: 5px; cursor: pointer;">
                     <option value="2">2 Players</option>
                     <option value="3">3 Players</option>
                     <option value="4" selected>4 Players</option>
                 </select>
                 <p style="margin-top:0;">Players</p>
             </div>
-        
+
             <div class="turn-widget">
                 <p>Current Turn:</p>
                 <div class="turn-stepper">
@@ -89,6 +90,11 @@
                 <div id="result-display-container">
                     <h2>Total</h2>
                     <div id="result-display">0</div>
+                </div>
+                <div id="move-bank-display" class="hidden">
+                    <p style="margin:0 0 5px 0; font-size:12px; color:#ccc;">AVAILABLE MOVES</p>
+                    <div id="move-bank-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    </div>
                 </div>
                 <button id="roll-button">Roll</button>
             </div>

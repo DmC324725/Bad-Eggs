@@ -228,3 +228,48 @@
 .confetti-lime {
     background-color: #a3e635;
 }
+
+/* === NEW: MOVE BANK STYLES === */
+#move-bank-display {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.bank-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #4b5563;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: 2px solid rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: transform 0.1s;
+    /* Flex centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bank-item:hover {
+    transform: scale(1.1);
+    background-color: #6b7280;
+}
+
+.bank-item.selected {
+    background-color: #22d3ee; /* Cyan */
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 10px #22d3ee;
+}
+
+#roll-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
