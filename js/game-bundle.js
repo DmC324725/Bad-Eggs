@@ -1,11 +1,11 @@
 /**
- * FINAL GAME BUNDLE (Bonus Rolls Added)
- * -------------------------------------
+ * FINAL GAME BUNDLE (Multiplayer Modes Fixed)
+ * -------------------------------------------
  * Updates:
- * 1. Rolling 6 or 12 now grants a Bonus Roll.
- * 2. Killing a player grants a Bonus Roll.
- * 3. One-Click Auto-Move is preserved.
- * 4. Stability fixes (Audio/DOM) preserved.
+ * 1. 2-Player Mode: Activates Red & Green only.
+ * 2. 3-Player Mode: Activates Red, Blue, & Green.
+ * 3. 4-Player Mode: Activates All.
+ * 4. Turn logic now strictly follows the active player list.
  */
 
 (function() {
@@ -211,6 +211,7 @@
 
     LudoGame.State = {
         isPairMode: false,
+        activeTeams: [], // New: Tracks who is playing (2, 3, or 4 players)
         selectedPawnInfo: null,
         globalMoveCounter: 0,
         boardState: {},
@@ -241,7 +242,8 @@
                 currentTurn: this.currentTurn,
                 isGameOver: this.isGameOver,
                 moveBank: this.moveBank,
-                pendingRolls: this.pendingRolls
+                pendingRolls: this.pendingRolls,
+                activeTeams: this.activeTeams
             })));
         },
         undo: function() {
@@ -257,13 +259,28 @@
             this.selectedBankIndex = -1;
             this.pendingRolls = 1;
 
+            // --- 1. DETERMINE PLAYER COUNT & ACTIVE TEAMS ---
+            const countSel = document.getElementById('player-count-select');
+            const count = countSel ? parseInt(countSel.value) : 4;
+            
+            // Define active teams based on standard Ludo rules
+            if (count === 2) {
+                this.activeTeams = ['red', 'green']; // Opposites
+            } else if (count === 3) {
+                this.activeTeams = ['red', 'blue', 'green'];
+            } else {
+                this.activeTeams = ['red', 'blue', 'green', 'yellow'];
+            }
+
+            // --- 2. SETUP BOARD ---
             const Config = LudoGame.Config;
             for (let r = 0; r < Config.ROWS; r++) {
                 for (let c = 0; c < Config.COLS; c++) this.boardState[`cell-${r}-${c}`] = [];
             }
             this.boardState['off-board-area'] = [];
 
-            ['red', 'blue', 'green', 'yellow'].forEach(team => {
+            // --- 3. SPAWN PAWNS (Only for active teams) ---
+            this.activeTeams.forEach(team => {
                 const home = Config.HOME_BASE_MAP[team];
                 for (let i = 0; i < 4; i++) {
                     this.boardState[home].push({ id: `${team[0]}${i}`, team: team, arrival: this.globalMoveCounter++ });
@@ -278,8 +295,10 @@
             this.isAnimating = false;
             this.isTurnOrderReversed = false;
             this.selectedPawnInfo = null;
+            
+            // Set initial turn to first active team
             this.turnIndex = 0;
-            this.currentTurn = Config.TURN_ORDER[0];
+            this.currentTurn = this.activeTeams[0];
             
             DiceGame.UI.resetVisuals();
             LudoGame.UI.updateRollButtonState();
@@ -468,7 +487,7 @@
                 this.elements.winnersList.appendChild(li);
             });
         },
-        // Legacy stubs for removed features
+        // Legacy stubs
         highlightPath: function(team, startId) {},
         clearHighlights: function() {
             document.querySelectorAll('.path-highlight').forEach(el => {
@@ -528,12 +547,10 @@
             State.moveBank.push(score);
             State.pendingRolls--; 
             
-            // --- FIX: BONUS ROLL LOGIC (6 or 12) ---
             if (score === 6 || score === 12) {
                 console.log("Bonus Roll! (6 or 12)");
                 State.pendingRolls++; 
             }
-            // ---------------------------------------
 
             State.selectedBankIndex = State.moveBank.length - 1;
             LudoGame.UI.renderMoveBank();
@@ -545,15 +562,30 @@
             const Config = LudoGame.Config;
             const UI = LudoGame.UI;
             if (State.isGameOver) return;
+            
+            // --- FIX: CYCLE ONLY THROUGH ACTIVE TEAMS ---
             do {
-                if (State.isTurnOrderReversed) State.turnIndex = (State.turnIndex - 1 + Config.TURN_ORDER.length) % Config.TURN_ORDER.length;
-                else State.turnIndex = (State.turnIndex + 1) % Config.TURN_ORDER.length;
-                const next = Config.TURN_ORDER[State.turnIndex];
-                if (State.isPairMode && State.teamsToSkip[next]) State.teamsToSkip[next] = false;
-                else if (!State.isPairMode && State.finishedTeams[next]) continue;
-                else break;
+                const totalActive = State.activeTeams.length;
+                if (State.isTurnOrderReversed) {
+                    State.turnIndex = (State.turnIndex - 1 + totalActive) % totalActive;
+                } else {
+                    State.turnIndex = (State.turnIndex + 1) % totalActive;
+                }
+                
+                const next = State.activeTeams[State.turnIndex];
+                
+                if (State.isPairMode && State.teamsToSkip[next]) {
+                    State.teamsToSkip[next] = false;
+                } else if (!State.isPairMode && State.finishedTeams[next]) {
+                    continue;
+                } else {
+                    break;
+                }
             } while (true);
-            State.currentTurn = Config.TURN_ORDER[State.turnIndex];
+            
+            State.currentTurn = State.activeTeams[State.turnIndex];
+            // --------------------------------------------
+            
             State.moveBank = [];
             State.selectedBankIndex = -1;
             State.pendingRolls = 1;
@@ -580,19 +612,26 @@
             const Config = LudoGame.Config;
             if (State.isGameOver) return;
             LudoGame.UI.hidePopup();
+            
+            // --- FIX: CYCLE ONLY THROUGH ACTIVE TEAMS ---
             let idx = State.turnIndex;
             let safety = 0;
+            const totalActive = State.activeTeams.length;
+
             do {
-                idx = (idx + offset + Config.TURN_ORDER.length) % Config.TURN_ORDER.length;
-                const next = Config.TURN_ORDER[idx];
+                idx = (idx + offset + totalActive) % totalActive;
+                const next = State.activeTeams[idx];
                 if (!State.isPairMode && State.finishedTeams[next]) {
                     safety++; if (safety > 4) break;
                     continue;
                 }
                 break;
             } while (true);
+            
             State.turnIndex = idx;
-            State.currentTurn = Config.TURN_ORDER[idx];
+            State.currentTurn = State.activeTeams[idx];
+            // --------------------------------------------
+
             State.moveBank = [];
             State.pendingRolls = 1;
             LudoGame.UI.updateTurn();
@@ -649,11 +688,7 @@
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
                         Audio.trigger('kill');
-                        
-                        // --- BONUS ROLL ON KILL ---
                         State.pendingRolls++;
-                        // --------------------------
-                        
                         setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
@@ -679,7 +714,9 @@
                         } else {
                             State.winnersList.push(pawn.team);
                             UI.updateWinners();
-                            if (State.winnersList.length === (Object.keys(Config.TEAM_COLORS).length - 1)) {
+                            // Check win based on ACTIVE teams only
+                            const totalPlayers = State.activeTeams.length;
+                            if (State.winnersList.length === (totalPlayers - 1)) {
                                 State.isGameOver = true;
                                 Audio.trigger('gameover');
                             }
@@ -719,6 +756,16 @@
         const State = LudoGame.State;
         
         document.getElementById('undo-btn')?.addEventListener('click', () => Core.reverseLastMove());
+        
+        // Player Count Change Listener
+        const pCount = document.getElementById('player-count-select');
+        if(pCount) {
+            pCount.addEventListener('change', () => {
+                // When count changes, we simply reset the game to apply new settings
+                document.getElementById('reset-btn').click();
+            });
+        }
+
         document.getElementById('mode-toggle')?.addEventListener('click', () => {
             State.isPairMode = !State.isPairMode;
             UI.elements.modeDisplay.innerText = State.isPairMode ? 'Team Mode' : 'Solo Mode';
