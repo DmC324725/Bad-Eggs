@@ -1,10 +1,9 @@
 /**
- * ROBUST GAME BUNDLE (Final Fix)
- * ------------------------------
- * Issues Fixed:
- * 1. "Stuck at Start": Added a retry-loop that waits for HTML elements to exist.
- * 2. "Empty Board": Forces a double-render on startup to ensure pawns appear.
- * 3. Audio & Animation safety checks included.
+ * FINAL FIXED GAME BUNDLE
+ * -----------------------
+ * Fixed: Roll Button staying disabled after turn change.
+ * Reason: Button state was updating while 'isAnimating' was still true.
+ * Solution: Forced a button state refresh in the 'finally' block of the move logic.
  */
 
 (function() {
@@ -759,6 +758,10 @@
                 State.isAnimating = false;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
                 if(UI.elements.modeBtn) UI.elements.modeBtn.disabled = false;
+                // --- FIX: FORCE UPDATE BUTTON STATE ---
+                // We must update the button here because the turn logic might have run
+                // while 'isAnimating' was true, which would keep the button disabled.
+                UI.updateRollButtonState();
             }
         }
     };
