@@ -1,9 +1,11 @@
 /**
- * FINAL FIXED GAME BUNDLE
- * -----------------------
- * Fixed: Roll Button staying disabled after turn change.
- * Reason: Button state was updating while 'isAnimating' was still true.
- * Solution: Forced a button state refresh in the 'finally' block of the move logic.
+ * FINAL GAME BUNDLE (Bonus Rolls Added)
+ * -------------------------------------
+ * Updates:
+ * 1. Rolling 6 or 12 now grants a Bonus Roll.
+ * 2. Killing a player grants a Bonus Roll.
+ * 3. One-Click Auto-Move is preserved.
+ * 4. Stability fixes (Audio/DOM) preserved.
  */
 
 (function() {
@@ -69,7 +71,7 @@
                 resetBtn: document.getElementById('reset-dice-btn'),
                 confetti: document.getElementById('confetti-container')
             };
-            return !!this.elements.btn; // Return true if button exists
+            return !!this.elements.btn;
         },
         setResult: function(text, classType) {
             if(!this.elements.display) return;
@@ -136,7 +138,6 @@
             DiceGame.UI.setDieLoading();
             DiceGame.Audio.playRattle();
 
-            // Disable button directly to prevent double clicks
             const btn = document.getElementById('roll-button');
             if(btn) btn.disabled = true;
 
@@ -145,7 +146,6 @@
             const config = DiceGame.Config;
             let finished = false;
 
-            // Safety timeout
             setTimeout(() => {
                 if(!finished) {
                     finished = true;
@@ -281,7 +281,6 @@
             this.turnIndex = 0;
             this.currentTurn = Config.TURN_ORDER[0];
             
-            // Sync Dice UI
             DiceGame.UI.resetVisuals();
             LudoGame.UI.updateRollButtonState();
         }
@@ -359,11 +358,10 @@
                 modal: document.getElementById('modal-overlay'),
                 postPopup: document.getElementById('post-move-popup')
             };
-            return !!this.elements.board; // Return true if board exists
+            return !!this.elements.board; 
         },
         buildGrid: function() {
             if (!this.elements.board) {
-                // Try to find it one last time
                 this.elements.board = document.getElementById('game-board');
                 if(!this.elements.board) return;
             }
@@ -403,17 +401,15 @@
             const container = document.getElementById(id);
             if (!container) return;
             const pawns = LudoGame.State.boardState[id];
-            const selected = LudoGame.State.selectedPawnInfo;
+            
             if (id === 'off-board-area') container.querySelectorAll('.pawn-stack').forEach(el => el.remove());
             else container.innerHTML = '';
+            
             const groups = {};
             if (pawns) pawns.forEach(p => { groups[p.team] = (groups[p.team] || 0) + 1; });
             for (const team in groups) {
                 const el = this.createPawn(team, groups[team]);
                 container.appendChild(el);
-                if (selected && selected.fromContainerId === id && selected.pawn.team === team) {
-                    el.classList.add('selected-pawn');
-                }
             }
         },
         renderBoard: function() {
@@ -438,11 +434,6 @@
                 btn.addEventListener('click', () => {
                     LudoGame.State.selectedBankIndex = index;
                     LudoGame.UI.renderMoveBank();
-                    if(LudoGame.State.selectedPawnInfo) {
-                        const info = LudoGame.State.selectedPawnInfo;
-                        LudoGame.UI.clearHighlights();
-                        LudoGame.UI.highlightPath(info.pawn.team, info.fromContainerId);
-                    }
                 });
                 bankList.appendChild(btn);
             });
@@ -452,7 +443,6 @@
         updateRollButtonState: function() {
             const btn = document.getElementById('roll-button');
             if (!btn) return;
-            // Force re-enable if logic says so
             const canRoll = LudoGame.State.pendingRolls > 0 && !LudoGame.State.isGameOver && !LudoGame.State.isAnimating;
             btn.disabled = !canRoll;
             btn.style.opacity = canRoll ? "1" : "0.5";
@@ -478,46 +468,18 @@
                 this.elements.winnersList.appendChild(li);
             });
         },
-        highlightPath: function(team, startId) {
-            const path = LudoGame.Config.TEAM_PATHS[team];
-            const idx = path.indexOf(startId);
-            if (idx === -1) return;
-            let limit = 12;
-            if(LudoGame.State.selectedBankIndex > -1) {
-                limit = LudoGame.State.moveBank[LudoGame.State.selectedBankIndex];
-            }
-            const nextSteps = path.slice(idx + 1, idx + 1 + limit);
-            nextSteps.forEach((cellId, i) => {
-                const cell = document.getElementById(cellId);
-                if (cell) {
-                    cell.classList.add('path-highlight', `path-highlight-${team}`);
-                    cell.style.animationDelay = `${i * 0.1}s`;
-                }
-            });
-        },
+        // Legacy stubs for removed features
+        highlightPath: function(team, startId) {},
         clearHighlights: function() {
             document.querySelectorAll('.path-highlight').forEach(el => {
                 el.className = el.className.replace(/path-highlight.*/, '').trim();
                 el.style.animationDelay = '0s';
             });
         },
-        showPopup: function(cell, showSelect) {
-            if(!this.elements.popup) return;
-            const r1 = cell.getBoundingClientRect();
-            const r2 = this.elements.wrapper.getBoundingClientRect();
-            this.elements.popup.style.top = `${r1.top - r2.top}px`;
-            this.elements.popup.style.left = `${r1.left - r2.left + r1.width + 5}px`;
-            this.elements.selectBtn.classList.toggle('hidden', !showSelect);
-            this.elements.popup.classList.remove('hidden');
-            cell.classList.add('target-cell');
-        },
+        showPopup: function(cell, showSelect) {},
         hidePopup: function() {
             if(!this.elements.popup) return;
             this.elements.popup.classList.add('hidden');
-            if (LudoGame.State.tempDestinationId) {
-                const cell = document.getElementById(LudoGame.State.tempDestinationId);
-                if (cell) cell.classList.remove('target-cell');
-            }
         },
         showPostMove: function() {
             if(!this.elements.modal) return;
@@ -565,36 +527,19 @@
             const State = LudoGame.State;
             State.moveBank.push(score);
             State.pendingRolls--; 
+            
+            // --- FIX: BONUS ROLL LOGIC (6 or 12) ---
+            if (score === 6 || score === 12) {
+                console.log("Bonus Roll! (6 or 12)");
+                State.pendingRolls++; 
+            }
+            // ---------------------------------------
+
             State.selectedBankIndex = State.moveBank.length - 1;
             LudoGame.UI.renderMoveBank();
             LudoGame.UI.updateRollButtonState();
         },
-        selectCell: function(cell) {
-            const State = LudoGame.State;
-            const Utils = LudoGame.Utils;
-            const UI = LudoGame.UI;
-            const id = cell.id;
-            if (id === 'off-board-area') return;
-            const pawns = State.boardState[id];
-            const teamToPlay = Utils.getTeamToPlay();
-            const validPawn = pawns.filter(p => p.team === teamToPlay).sort((a, b) => a.arrival - b.arrival)[0];
-            if (validPawn) {
-                this.clearSelection();
-                State.selectedPawnInfo = { fromContainerId: id, pawn: validPawn };
-                UI.renderContainer(id);
-                UI.highlightPath(teamToPlay, id);
-            }
-        },
-        clearSelection: function() {
-            const State = LudoGame.State;
-            const UI = LudoGame.UI;
-            if (State.selectedPawnInfo) {
-                const oldId = State.selectedPawnInfo.fromContainerId;
-                State.selectedPawnInfo = null;
-                UI.renderContainer(oldId);
-            }
-            UI.clearHighlights();
-        },
+        clearSelection: function() { },
         advanceTurn: function() {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
@@ -627,8 +572,6 @@
                 UI.updateWinners();
                 UI.renderMoveBank(); 
                 UI.updateRollButtonState();
-                this.clearSelection();
-                UI.hidePopup();
                 LudoGame.Audio.trigger('return');
             }
         },
@@ -636,7 +579,6 @@
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             if (State.isGameOver) return;
-            this.clearSelection();
             LudoGame.UI.hidePopup();
             let idx = State.turnIndex;
             let safety = 0;
@@ -707,7 +649,11 @@
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
                         Audio.trigger('kill');
+                        
+                        // --- BONUS ROLL ON KILL ---
                         State.pendingRolls++;
+                        // --------------------------
+                        
                         setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
@@ -758,16 +704,13 @@
                 State.isAnimating = false;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
                 if(UI.elements.modeBtn) UI.elements.modeBtn.disabled = false;
-                // --- FIX: FORCE UPDATE BUTTON STATE ---
-                // We must update the button here because the turn logic might have run
-                // while 'isAnimating' was true, which would keep the button disabled.
                 UI.updateRollButtonState();
             }
         }
     };
 
     /* ==========================================================================
-       PART 3: STARTUP SEQUENCE (Corrected for Race Conditions)
+       PART 3: STARTUP SEQUENCE
        ========================================================================== */
     
     function setupEventListeners() {
@@ -793,100 +736,71 @@
                 UI.renderBoard();
                 UI.updateTurn();
                 UI.renderMoveBank();
-                Core.clearSelection();
                 UI.hidePopup();
                 UI.updateWinners();
             }
         });
         
-        document.getElementById('popup-move')?.addEventListener('click', () => {
-            if (State.selectedPawnInfo && State.tempDestinationId) {
-                const { fromContainerId, pawn } = State.selectedPawnInfo;
-                Core.clearSelection();
-                UI.hidePopup();
-                Core.performMove(fromContainerId, State.tempDestinationId, pawn);
-            }
-        });
-        document.getElementById('popup-select-instead')?.addEventListener('click', () => {
-            if (State.tempDestinationId) {
-                const newId = State.tempDestinationId;
-                UI.hidePopup();
-                Core.clearSelection();
-                Core.selectCell(document.getElementById(newId));
-            }
-        });
-        document.getElementById('popup-cancel')?.addEventListener('click', () => UI.hidePopup());
-        
+        // Manual Turn Control
         document.getElementById('prev-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(-1));
         document.getElementById('next-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(1));
 
+        // Dice Roll
         document.getElementById('roll-button')?.addEventListener('click', () => {
             DiceGame.Core.roll();
         });
         
+        // --- ONE CLICK AUTO-MOVE LOGIC ---
         document.body.addEventListener('click', (event) => {
             if (State.isGameOver || State.isAnimating) return;
             const clickedContainer = event.target.closest('.pawn-container');
-            if (event.target.closest('.dice-roller') || event.target.closest('#popup-menu') || event.target.closest('#move-bank-list')) return;
+            if (event.target.closest('.dice-roller') || event.target.closest('#move-bank-list')) return;
             
             if (!clickedContainer) return;
             const containerId = clickedContainer.id;
 
-            if (!State.selectedPawnInfo) {
-                UI.hidePopup();
-                const teamToPlay = LudoGame.Utils.getTeamToPlay();
-                const hasPawn = State.boardState[containerId].some(p => p.team === teamToPlay);
-                if (hasPawn) Core.selectCell(clickedContainer);
-            } else {
-                const fromId = State.selectedPawnInfo.fromContainerId;
-                if (fromId === containerId) {
-                    Core.clearSelection();
-                    UI.hidePopup();
-                    return;
-                }
-                if (State.tempDestinationId) {
-                    const old = document.getElementById(State.tempDestinationId);
-                    if (old) old.classList.remove('target-cell');
-                }
-                
-                if(State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
-                    console.warn("You must roll the dice first!");
-                    return; 
-                }
-
-                const team = State.selectedPawnInfo.pawn.team;
-                const path = LudoGame.Config.TEAM_PATHS[team];
-                const start = path.indexOf(fromId);
-                const end = path.indexOf(containerId);
-                const steps = end - start;
-                const moveVal = State.moveBank[State.selectedBankIndex];
-                
-                if (end === -1 || steps !== moveVal) return; 
-
-                State.tempDestinationId = containerId;
-                let showSelect = false;
-                if (containerId !== 'off-board-area') {
-                    const teamToPlay = LudoGame.Utils.getTeamToPlay();
-                    showSelect = State.boardState[containerId].some(p => p.team === teamToPlay);
-                }
-                UI.showPopup(clickedContainer, showSelect);
+            // 1. Must have a rolled number available
+            if(State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
+                console.warn("You must roll the dice first!");
+                return; 
             }
+
+            // 2. Identify if there is a pawn for the current team
+            const pawns = State.boardState[containerId];
+            const teamToPlay = LudoGame.Utils.getTeamToPlay();
+            const pawn = pawns.filter(p => p.team === teamToPlay).sort((a, b) => a.arrival - b.arrival)[0];
+
+            if (!pawn) return; 
+
+            // 3. Calculate Target
+            const path = LudoGame.Config.TEAM_PATHS[pawn.team];
+            const start = path.indexOf(containerId);
+            if (start === -1) return;
+
+            const moveVal = State.moveBank[State.selectedBankIndex];
+            const endIdx = start + moveVal;
+
+            // 4. Validate Move
+            if (endIdx >= path.length) return; 
+
+            const toId = path[endIdx];
+
+            // 5. Execute Auto Move
+            Core.performMove(containerId, toId, pawn);
         });
     }
 
     // --- ROBUST INIT SEQUENCE ---
-    // Retries 10 times (every 100ms) to find the HTML elements before giving up
     let attempts = 0;
     const startGame = () => {
         const boardReady = LudoGame.UI.init();
-        const diceReady = DiceGame.UI.init(); // Also checks for button
+        const diceReady = DiceGame.UI.init(); 
 
         if (boardReady && diceReady) {
             console.log("Game Modules Loaded.");
             LudoGame.UI.buildGrid();
             setupEventListeners();
             LudoGame.State.reset();
-            // Force a double render to ensure pawns appear
             setTimeout(() => LudoGame.UI.renderBoard(), 100);
         } else {
             if (attempts < 10) {
