@@ -1,11 +1,11 @@
 /**
- * FINAL GAME BUNDLE (Multiplayer Modes Fixed)
- * -------------------------------------------
+ * INTELLIGENT AUTO-MOVE GAME BUNDLE
+ * ---------------------------------
  * Updates:
- * 1. 2-Player Mode: Activates Red & Green only.
- * 2. 3-Player Mode: Activates Red, Blue, & Green.
- * 3. 4-Player Mode: Activates All.
- * 4. Turn logic now strictly follows the active player list.
+ * 1. AUTO-MOVE: If only one valid move exists, it happens automatically.
+ * 2. AUTO-SKIP: If no moves are possible (e.g., roll is too high), the turn is skipped immediately (bonus rolls forfeit).
+ * 3. 2/3/4 Player Modes fully supported.
+ * 4. Bonus rolls for 6/12 and Kills retained (unless move is impossible).
  */
 
 (function() {
@@ -211,7 +211,7 @@
 
     LudoGame.State = {
         isPairMode: false,
-        activeTeams: [], // New: Tracks who is playing (2, 3, or 4 players)
+        activeTeams: [],
         selectedPawnInfo: null,
         globalMoveCounter: 0,
         boardState: {},
@@ -259,27 +259,23 @@
             this.selectedBankIndex = -1;
             this.pendingRolls = 1;
 
-            // --- 1. DETERMINE PLAYER COUNT & ACTIVE TEAMS ---
             const countSel = document.getElementById('player-count-select');
             const count = countSel ? parseInt(countSel.value) : 4;
             
-            // Define active teams based on standard Ludo rules
             if (count === 2) {
-                this.activeTeams = ['red', 'green']; // Opposites
+                this.activeTeams = ['red', 'green'];
             } else if (count === 3) {
                 this.activeTeams = ['red', 'blue', 'green'];
             } else {
                 this.activeTeams = ['red', 'blue', 'green', 'yellow'];
             }
 
-            // --- 2. SETUP BOARD ---
             const Config = LudoGame.Config;
             for (let r = 0; r < Config.ROWS; r++) {
                 for (let c = 0; c < Config.COLS; c++) this.boardState[`cell-${r}-${c}`] = [];
             }
             this.boardState['off-board-area'] = [];
 
-            // --- 3. SPAWN PAWNS (Only for active teams) ---
             this.activeTeams.forEach(team => {
                 const home = Config.HOME_BASE_MAP[team];
                 for (let i = 0; i < 4; i++) {
@@ -296,7 +292,6 @@
             this.isTurnOrderReversed = false;
             this.selectedPawnInfo = null;
             
-            // Set initial turn to first active team
             this.turnIndex = 0;
             this.currentTurn = this.activeTeams[0];
             
@@ -487,7 +482,6 @@
                 this.elements.winnersList.appendChild(li);
             });
         },
-        // Legacy stubs
         highlightPath: function(team, startId) {},
         clearHighlights: function() {
             document.querySelectorAll('.path-highlight').forEach(el => {
@@ -542,19 +536,75 @@
     };
 
     LudoGame.Core = {
+        // --- NEW: Helper to find all legal moves for current dice ---
+        getValidMoves: function(team, diceValue) {
+            const validMoves = [];
+            const path = LudoGame.Config.TEAM_PATHS[team];
+
+            // Scan board state for pawns of this team
+            for (const [cellId, pawns] of Object.entries(LudoGame.State.boardState)) {
+                if (cellId === 'off-board-area') continue;
+
+                // Check if this cell has pawns of the current team
+                const teamPawns = pawns.filter(p => p.team === team);
+                if (teamPawns.length > 0) {
+                    // Logic: If multiple pawns are on one cell, they are "one" move option source
+                    const pawn = teamPawns[0]; 
+                    const currentIdx = path.indexOf(cellId);
+                    
+                    if (currentIdx !== -1) {
+                        const targetIdx = currentIdx + diceValue;
+                        if (targetIdx < path.length) {
+                            validMoves.push({
+                                fromId: cellId,
+                                toId: path[targetIdx],
+                                pawn: pawn 
+                            });
+                        }
+                    }
+                }
+            }
+            return validMoves;
+        },
+
         onDiceRolled: function(score) {
             const State = LudoGame.State;
             State.moveBank.push(score);
             State.pendingRolls--; 
             
+            // 1. Bonus Roll Logic (Default)
+            let bonusEarned = false;
             if (score === 6 || score === 12) {
-                console.log("Bonus Roll! (6 or 12)");
+                bonusEarned = true;
                 State.pendingRolls++; 
             }
+            
+            // 2. Check Valid Moves
+            const moves = this.getValidMoves(State.currentTurn, score);
+            
+            if (moves.length === 0) {
+                // --- AUTO-SKIP: No moves possible ---
+                console.log("No valid moves. Skipping turn (Bonus forfeit).");
+                // Rule: If no moves, you lose the bonus roll too.
+                State.pendingRolls = 0; 
+                State.moveBank = [];
+                // Delay slightly so user sees the dice result
+                setTimeout(() => this.advanceTurn(), 1000); 
 
-            State.selectedBankIndex = State.moveBank.length - 1;
-            LudoGame.UI.renderMoveBank();
-            LudoGame.UI.updateRollButtonState();
+            } else if (moves.length === 1) {
+                // --- AUTO-MOVE: Single option ---
+                console.log("Single move possible. Auto-executing.");
+                State.selectedBankIndex = State.moveBank.length - 1;
+                const m = moves[0];
+                // performMove will consume the bank index we just set
+                this.performMove(m.fromId, m.toId, m.pawn);
+
+            } else {
+                // --- Multiple Options: Wait for user input ---
+                State.selectedBankIndex = State.moveBank.length - 1;
+                LudoGame.UI.renderMoveBank();
+                LudoGame.UI.updateRollButtonState();
+            }
         },
         clearSelection: function() { },
         advanceTurn: function() {
@@ -563,7 +613,6 @@
             const UI = LudoGame.UI;
             if (State.isGameOver) return;
             
-            // --- FIX: CYCLE ONLY THROUGH ACTIVE TEAMS ---
             do {
                 const totalActive = State.activeTeams.length;
                 if (State.isTurnOrderReversed) {
@@ -584,7 +633,6 @@
             } while (true);
             
             State.currentTurn = State.activeTeams[State.turnIndex];
-            // --------------------------------------------
             
             State.moveBank = [];
             State.selectedBankIndex = -1;
@@ -613,7 +661,6 @@
             if (State.isGameOver) return;
             LudoGame.UI.hidePopup();
             
-            // --- FIX: CYCLE ONLY THROUGH ACTIVE TEAMS ---
             let idx = State.turnIndex;
             let safety = 0;
             const totalActive = State.activeTeams.length;
@@ -630,7 +677,6 @@
             
             State.turnIndex = idx;
             State.currentTurn = State.activeTeams[idx];
-            // --------------------------------------------
 
             State.moveBank = [];
             State.pendingRolls = 1;
@@ -688,7 +734,9 @@
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
                         Audio.trigger('kill');
-                        State.pendingRolls++;
+                        
+                        State.pendingRolls++; // Bonus Roll for Kill
+                        
                         setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
@@ -714,7 +762,6 @@
                         } else {
                             State.winnersList.push(pawn.team);
                             UI.updateWinners();
-                            // Check win based on ACTIVE teams only
                             const totalPlayers = State.activeTeams.length;
                             if (State.winnersList.length === (totalPlayers - 1)) {
                                 State.isGameOver = true;
@@ -761,7 +808,6 @@
         const pCount = document.getElementById('player-count-select');
         if(pCount) {
             pCount.addEventListener('change', () => {
-                // When count changes, we simply reset the game to apply new settings
                 document.getElementById('reset-btn').click();
             });
         }
@@ -806,20 +852,17 @@
             if (!clickedContainer) return;
             const containerId = clickedContainer.id;
 
-            // 1. Must have a rolled number available
             if(State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
                 console.warn("You must roll the dice first!");
                 return; 
             }
 
-            // 2. Identify if there is a pawn for the current team
             const pawns = State.boardState[containerId];
             const teamToPlay = LudoGame.Utils.getTeamToPlay();
             const pawn = pawns.filter(p => p.team === teamToPlay).sort((a, b) => a.arrival - b.arrival)[0];
 
             if (!pawn) return; 
 
-            // 3. Calculate Target
             const path = LudoGame.Config.TEAM_PATHS[pawn.team];
             const start = path.indexOf(containerId);
             if (start === -1) return;
@@ -827,12 +870,9 @@
             const moveVal = State.moveBank[State.selectedBankIndex];
             const endIdx = start + moveVal;
 
-            // 4. Validate Move
             if (endIdx >= path.length) return; 
 
             const toId = path[endIdx];
-
-            // 5. Execute Auto Move
             Core.performMove(containerId, toId, pawn);
         });
     }
