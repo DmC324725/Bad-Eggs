@@ -546,19 +546,30 @@
         // --- 1. LOGIC FIX: Check Partner's pawns if current player is finished ---
         getValidMoves: function(team, diceValue) {
             const State = LudoGame.State;
+            const Config = LudoGame.Config;
             const Utils = LudoGame.Utils;
             
-            // Determine "Effective Team"
-            // If Pair Mode AND Current Team is finished, they play for their partner
+            // 1. Determine "Effective Team" (Pair Mode Logic)
             let effectiveTeam = team;
             if (State.isPairMode && State.finishedTeams[team]) {
                 effectiveTeam = Utils.getTeammate(team);
-                // Safety: If partner is ALSO finished, no moves possible (Game Over logic handles this elsewhere)
                 if (State.finishedTeams[effectiveTeam]) return [];
             }
 
+            // --- 2. NEW RESTRICTION LOGIC START ---
+            const homeId = Config.HOME_BASE_MAP[effectiveTeam];
+            
+            // Count how many pawns are currently sitting in the home base
+            const pawnsAtHomeCount = State.boardState[homeId] ? 
+                State.boardState[homeId].filter(p => p.team === effectiveTeam).length : 0;
+            
+            // Count how many pawns have successfully finished
+            const pawnsFinishedCount = State.boardState['off-board-area'] ? 
+                State.boardState['off-board-area'].filter(p => p.team === effectiveTeam).length : 0;
+            // --- NEW RESTRICTION LOGIC END ---
+
             const validMoves = [];
-            const path = LudoGame.Config.TEAM_PATHS[effectiveTeam]; // Use effective team path
+            const path = Config.TEAM_PATHS[effectiveTeam]; 
 
             // Scan board state
             for (const [cellId, pawns] of Object.entries(State.boardState)) {
@@ -569,6 +580,16 @@
                 
                 if (teamPawns.length > 0) {
                     const pawn = teamPawns[0]; 
+
+                    // --- 3. APPLY RESTRICTION ---
+                    // Rule: If this pawn is at Home, AND it's the last one there, AND no pawns have finished...
+                    // Then this move is illegal.
+                    if (cellId === homeId && pawnsAtHomeCount === 1 && pawnsFinishedCount === 0) {
+                        // Log for debugging (optional)
+                        // console.log(`Restricted: Cannot move last pawn of ${effectiveTeam} until one finishes.`);
+                        continue; 
+                    }
+
                     const currentIdx = path.indexOf(cellId);
                     
                     if (currentIdx !== -1) {
@@ -585,7 +606,6 @@
             }
             return validMoves;
         },
-
         onDiceRolled: function(score) {
             const State = LudoGame.State;
             State.moveBank.push(score);
@@ -853,7 +873,6 @@
 
             const icon = document.querySelector('#mode-toggle img');
             if (icon) {
-                // Swap the file path based on the state
                 icon.src = State.isPairMode ? 'assets/duo-icon.svg' : 'assets/solo-icon.svg';
             }
 
@@ -881,34 +900,34 @@
         //  START OF NEW VISIBILITY CODE
         // ==========================================
         // Inside setupEventListeners...
-const visBtn = document.getElementById('visibility-btn');
-const controlsContainer = document.querySelector('.controls');
+        const visBtn = document.getElementById('visibility-btn');
+        const controlsContainer = document.querySelector('.controls');
 
 // Define Icons
-const iconEye = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-const iconEyeSlash = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path></svg>`;
+        const iconEye = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        const iconEyeSlash = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path></svg>`;
 
-if(visBtn && controlsContainer) {
-    visBtn.addEventListener('click', () => {
+        if(visBtn && controlsContainer) {
+            visBtn.addEventListener('click', () => {
         // Toggle the 'hidden' class on the container
-        const isHidden = controlsContainer.classList.toggle('hidden');
+                const isHidden = controlsContainer.classList.toggle('hidden');
         
-        if (isHidden) {
+                if (isHidden) {
             // Controls are GONE. Board moves up.
-            visBtn.innerHTML = iconEyeSlash;
-            visBtn.title = "Show Controls";
+                    visBtn.innerHTML = iconEyeSlash;
+                    visBtn.title = "Show Controls";
             
             // Optional: Move button to a more convenient spot when hidden?
             // For now, it stays in the top-right corner defined by CSS.
-        } else {
+                } else {
             // Controls are BACK.
-            visBtn.innerHTML = iconEye;
-            visBtn.title = "Hide Controls";
+                    visBtn.innerHTML = iconEye;
+                    visBtn.title = "Hide Controls";
+                }
+            });
         }
-    });
-}
 
-        // --- FIX 3: MUSIC TOGGLE ---
+        // Music Toggle
         const musicBtn = document.getElementById('music-btn');
         const bgAudio = document.getElementById('bg-music');
 
@@ -940,52 +959,40 @@ if(visBtn && controlsContainer) {
             DiceGame.Core.roll();
         });
         
-        // --- ONE CLICK AUTO-MOVE LOGIC (STRICT) ---
+        // --- FIXED CLICK LISTENER ---
         document.body.addEventListener('click', (event) => {
             if (State.isGameOver || State.isAnimating) return;
+            
             const clickedContainer = event.target.closest('.pawn-container');
+            // Ignore clicks on UI elements
             if (event.target.closest('.dice-roller') || event.target.closest('#move-bank-list')) return;
             
             if (!clickedContainer) return;
             const containerId = clickedContainer.id;
 
+            // 1. Ensure we have a dice roll available
             if(State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
                 console.warn("You must roll the dice first!");
                 return; 
             }
 
-            const pawns = State.boardState[containerId];
+            const currentDiceValue = State.moveBank[State.selectedBankIndex];
             const teamToPlay = LudoGame.Utils.getTeamToPlay();
-            const pawn = pawns.filter(p => p.team === teamToPlay).sort((a, b) => a.arrival - b.arrival)[0];
 
-            if (!pawn) return; 
-
-            const path = LudoGame.Config.TEAM_PATHS[pawn.team];
-            const start = path.indexOf(containerId);
+            // 2. ASK CORE: "Is this move valid?" (This enforces the Anchor Rule)
+            const allowedMoves = Core.getValidMoves(State.currentTurn, currentDiceValue);
             
-            // STRICT CHECK: Is current location in path?
-            if (start === -1) {
-                console.error("Critical: Clicked pawn is not on its assigned path.");
-                return;
-            }
+            // 3. Check if the clicked cell is in the allowed list
+            const validMove = allowedMoves.find(m => m.fromId === containerId && m.pawn.team === teamToPlay);
 
-            const moveVal = State.moveBank[State.selectedBankIndex];
-            const endIdx = start + moveVal;
-
-            // STRICT CHECK: Is target location in path?
-            if (endIdx >= path.length) {
-                console.warn("Move exceeds path length. Action blocked.");
+            if (!validMove) {
+                console.warn("Move Invalid (Blocked by Rules or Path).");
+                // Optional: Shake animation or visual feedback here
                 return; 
             }
 
-            const toId = path[endIdx];
-            // Double check that toId is actually in path array (redundant but safe)
-            if(!path.includes(toId)) {
-                console.error("Critical: Calculated destination is invalid.");
-                return;
-            }
-
-            Core.performMove(containerId, toId, pawn);
+            // 4. Execute the sanctioned move
+            Core.performMove(validMove.fromId, validMove.toId, validMove.pawn);
         });
     }
 
