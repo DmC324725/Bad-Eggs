@@ -35,8 +35,7 @@
         align-items: center;
     }
 
-    .control-group,
-    .status-panels {
+    .control-group {
         justify-content: center;
     }
 

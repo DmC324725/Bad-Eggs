@@ -3,6 +3,13 @@
     Styles for the top control bar, sidebars, popups, and overlays.
 */
 
+.ui-header-container {
+    position: relative; /* Establishes coordinate system for the button */
+    width: 100%;
+    max-width: 1000px; /* Matches your controls width */
+    margin: 0 auto 20px auto; /* Centered, with bottom spacing */
+}
+
 /* --- 1. Sidebar Wrapper --- */
 .sidebar {
     display: flex;
@@ -16,30 +23,38 @@
 .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 12px; /* Slightly tighter gap looks better with pills */
     align-items: center;
-    justify-content: space-between;
+    
+    /* CHANGE 1: Center items instead of spreading them to edges */
+    justify-content: center; 
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    
     padding: 10px 20px;
-    background: #fff;
+    background: #fff; 
     border: 2px solid #444;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 1000px;
+    border-radius: 12px; /* Increased radius slightly to match the pills */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* CHANGE 2: The Magic Fix */
+    width: fit-content;  /* Only takes up necessary space */
+    max-width: 95%;      /* Prevents it from touching edges on mobile */
+    margin: 20px auto;   /* Centers the bar horizontally on the page */
+    
     box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+}
+
+.controls.hidden {
+    /* This creates the space saving effect! */
+    display: none !important; 
 }
 
 .control-group {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    align-items: center;
-}
-
-.status-panels {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
     align-items: center;
 }
 
@@ -135,52 +150,69 @@
 }
 
 /* --- 4. Status Panels (Winners / Off Board) --- */
-#off-board-area {
-    background-color: #f3f3f3;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 8px;
-    box-sizing: border-box;
+/* --- SHARED PILL STYLE --- */
+.info-pill {
+    height: 32px;
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
     align-items: center;
-    gap: 5px;
-    min-width: 200px;
-    max-width: 300px;
-    min-height: 50px;
+    
+    background-color: #1e293b; /* Dark Slate */
+    border: 1px solid #334155;
+    border-radius: 50px;
+    padding: 0 12px;
+    gap: 8px;
+    
+    color: #94a3b8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 100px; 
+    overflow: hidden;
+    transition: width 0.3s ease;
 }
 
-#off-board-area h3 {
-    width: 100%;
-    margin: 0 0 5px 0;
-    text-align: center;
-    font-size: 1em;
-    font-weight: bold;
+.pill-icon {
+    width: 16px;
+    height: 16px;
+    color: #cbd5e1;
+    flex-shrink: 0;
 }
 
-#winners-area {
-    background-color: #f3f3f3;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 8px;
-    box-sizing: border-box;
-    min-width: 150px;
-    min-height: 50px;
-}
-
-#winners-area h3 {
-    margin: 0 0 5px 0;
-    text-align: center;
-    font-size: 1em;
-    font-weight: bold;
-}
-
-#winners-list {
+.info-pill h3 {
     margin: 0;
-    padding-left: 20px;
-    font-size: 0.9em;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b; 
+    border-right: 1px solid #334155; 
+    padding-right: 8px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* --- WINNERS LIST --- */
+#winners-list {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+}
+
+/* --- OFF BOARD PAWNS --- */
+#off-board-area {
+    display: flex;
+    align-items: center;
+}
+
+/* Important: Scale down the pawns so they fit inside the pill */
+#off-board-area .pawn-stack {
+    transform: scale(0.6); 
+    margin: 0 -4px; 
+    position: relative;
+    top: 1px;
 }
 
 /* --- 5. Popups & Modals --- */
@@ -573,4 +605,52 @@
 #player-count-select option {
     background-color: #1e293b;
     color: white;
+}
+
+/* 4. The Floating Visibility Button */
+#visibility-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 50; /* Sits on top */
+    
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: #64748b;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+#visibility-btn:hover {
+    background-color: #475569;
+    transform: scale(1.1);
+}
+
+#visibility-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+/* Optional: If controls are visible, push the button slightly 
+   to the right so it doesn't overlap the border */
+@media (min-width: 768px) {
+    #visibility-btn {
+        right: -45px; /* Floats outside to the right on desktop */
+        top: 10px;    /* Aligns vertically with the bar */
+    }
+}
+/* On mobile, keep it in the corner */
+@media (max-width: 768px) {
+    #visibility-btn {
+        top: -40px;   /* Sits above the controls */
+        right: 10px;
+    }
 }
