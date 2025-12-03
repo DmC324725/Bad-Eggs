@@ -66,38 +66,72 @@
 }
 
 /* --- 3. Turn Widget (Stepper) --- */
-.turn-widget {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
+/* Container: Fixed 32px Height */
 .turn-stepper {
+    height: 40px;             /* Strict height limit */
+    box-sizing: border-box;   /* Ensures padding/border doesn't add to height */
+    
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 8px;                 /* Slightly tighter gap */
+    
+    background-color: #1e293b; 
+    padding: 0 8px;           /* Horizontal padding only */
+    border-radius: 50px;
+    border: 1px solid #334155;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-#turn-display {
-    padding: 8px 16px;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    min-width: 80px;
-    text-align: center;
-}
-
+/* The Previous/Next Buttons (Tiny) */
 .stepper-btn {
-    padding: 5px 10px !important;
-    font-size: 12px !important;
-    background-color: #eee;
-    border: 1px solid #bbb;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    
+    /* Size: Small enough to fit, smaller than the dot */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    color: #94a3b8; 
+    transition: all 0.2s ease;
 }
 
 .stepper-btn:hover {
-    background-color: #ddd;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.stepper-btn svg {
+    width: 14px; /* Scaled down icon */
+    height: 14px;
+    display: block;
+}
+
+/* The Color Indicator (Dominant) */
+#turn-display {
+    /* Size: 24px + 4px border = 28px total visual size */
+    /* This fits perfectly inside the 32px container with 2px breathing room */
+    width: 24px;
+    height: 24px;
+    
+    border-radius: 50%;
+    background-color: #ccc; 
+    
+    /* Depth effects */
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 
+                0 2px 4px rgba(0,0,0,0.4);
+    
+    /* Dark border to separate from background */
+    border: 2px solid #0f172a; 
+    
+    transition: background-color 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* --- 4. Status Panels (Winners / Off Board) --- */
@@ -254,38 +288,118 @@
 }
 
 #undo-btn {
-    background-color: #4b5563;
-    /* Dark Gray */
-    color: white;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    
+    border-radius: 50%;
     border: none;
-    height: 40px;
+    
+    /* New Color: Vibrant Purple */
+    background-color: #8b5cf6; 
+    cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 #undo-btn:hover {
-    background-color: #374151;
+    /* Darker Purple on hover */
+    background-color: #7c3aed; 
+    transform: scale(1.1);
 }
 
-/* Music Button */
+#undo-btn:active {
+    transform: scale(0.95);
+}
+
+#undo-btn img {
+    width: 28px;
+    height: 28px;
+    display: block;
+    filter: brightness(0) invert(1); 
+}
+
+/* Music Button Base Style (Off State) */
+/* Music Button Base */
 #music-btn {
-    font-size: 16px;
-    padding: 8px 12px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    
+    border-radius: 50%;
+    border: none;
+    
+    background-color: #64748b; /* Slate Gray */
+    
     cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #64748b; /* Slate Gray (Off) */
-    color: white;
-    transition: background-color 0.3s;
-    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    
+    transition: background-color 0.3s ease;
 }
 
-#music-btn.playing {
-    background-color: #10b981; /* Emerald Green (On) */
-    border-color: #059669;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+/* Icon Sizing & Coloring */
+#music-btn img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    
+    /* Forces the icon to be white, regardless of the SVG file color */
+    filter: brightness(0) invert(1); 
 }
 
+/* --- HOVER BEAT ANIMATION --- */
 #music-btn:hover {
-    opacity: 0.9;
+    /* Scale: 1 -> 1.25 -> 0.9 -> 1.15 */
+    animation: btn-beat 0.6s ease-in-out forwards;
+}
+
+@keyframes btn-beat {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.25); } /* Big */
+    70%  { transform: scale(0.9); }  /* Small */
+    100% { transform: scale(1.15); } /* Slightly larger resting state */
+}
+
+/* --- PLAYING STATE (Blue + Shimmer) --- */
+#music-btn.playing {
+    background-color: #2563eb; 
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.6); 
+}
+
+#music-btn.playing::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    
+    transform: skewX(-20deg); 
+    animation: music-btn-shimmer-anim 2s infinite linear;
+}
+
+@keyframes music-btn-shimmer-anim {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; } 
 }
 
 #mode-toggle {
@@ -350,4 +464,113 @@
 /* This triggers when your JS runs: sel.disabled = true */
 #player-count-select:disabled {
   display: none;
+}
+
+#reset-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    
+    border-radius: 50%;
+    border: none;
+    
+    /* Vibrant Orange (Distinct from the 'Yellow' player) */
+    background-color: #f97316; 
+    
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+#reset-btn:hover {
+    background-color: #ea580c; /* Darker Orange */
+    /* The Combine Effect: Spins 180 degrees AND grows 10% */
+    transform: rotate(180deg) scale(1.1);
+}
+
+#reset-btn:active {
+    transform: rotate(180deg) scale(0.95);
+}
+
+#reset-btn img {
+    width: 20px; /* Slightly smaller icon looks cleaner for reset */
+    height: 20px;
+    display: block;
+    filter: brightness(0) invert(1); /* Makes the SVG white */
+}
+
+/* The Pill Container */
+.pill-select-wrapper {
+    position: relative; /* Essential for stacking */
+    height: 40px;
+    display: flex;
+    align-items: center;
+    
+    background-color: #1e293b; /* Dark Slate (Matches Turn Widget) */
+    border: 1px solid #334155;
+    border-radius: 50px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    
+    padding: 0 10px;
+    width: fit-content;
+    color: #94a3b8; /* Muted text */
+    transition: all 0.2s ease;
+}
+
+/* Hover Effect */
+.pill-select-wrapper:hover {
+    border-color: #475569;
+    background-color: #334155;
+    color: #ffffff;
+}
+
+/* The Left Icon (Users) */
+.select-icon-left {
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+    pointer-events: none; /* Let clicks pass through */
+}
+
+/* The Right Icon (Chevron) */
+.select-arrow-right {
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+    pointer-events: none;
+}
+
+/* The Actual Select Element */
+#player-count-select {
+    /* Remove default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    background: transparent;
+    border: none;
+    color: inherit; /* Inherit color from wrapper */
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    
+    /* Layout */
+    height: 100%;
+    padding-right: 4px; /* Space for the text */
+    outline: none;
+    
+    /* Ensure it sits on top and catches clicks */
+    position: relative;
+    z-index: 2;
+}
+
+/* Fix for standard option text color in dropdowns */
+#player-count-select option {
+    background-color: #1e293b;
+    color: white;
 }

@@ -22,27 +22,42 @@
                 </button>
             </div>
 
-            <div>
-                <select id="player-count-select"
-                    style="font-size: 16px; padding: 8px; border-radius: 5px; cursor: pointer;">
-                    <option value="2">2 Players</option>
-                    <option value="3">3 Players</option>
-                    <option value="4" selected>4 Players</option>
-                </select>
-            </div>
+           <div class="pill-select-wrapper">
+    <svg class="select-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
 
-            <div class="turn-widget">
-                <p>Current Turn:</p>
-                <div class="turn-stepper">
-                    <button id="prev-turn-btn" class="stepper-btn" title="Previous Player">◀</button>
-                    <div id="turn-display">RED</div>
-                    <button id="next-turn-btn" class="stepper-btn" title="Next Player">▶</button>
-                </div>
-            </div>
-            <button id="undo-btn" title="Reverse Last Move">↩ Undo</button>
-            <button id="music-btn" title="Toggle Background Music">🎵 Off</button>
+    <select id="player-count-select">
+        <option value="2">2 Players</option>
+        <option value="3">3 Players</option>
+        <option value="4" selected>4 Players</option>
+    </select>
 
-            <button id="reset-btn">Reset Game</button>
+    <svg class="select-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+</div>
+
+           <div class="turn-widget">
+    <div class="turn-stepper">
+        <button id="prev-turn-btn" class="stepper-btn" title="Previous Player">◀</button>
+        <div id="turn-display"></div>
+        <button id="next-turn-btn" class="stepper-btn" title="Next Player">▶</button>
+    </div>
+</div>
+            <button id="undo-btn" title="Reverse Last Move">
+                <img src="assets/undo-icon.svg" alt="Undo">
+            </button>
+            <button id="music-btn" title="Toggle Background Music">
+                <img src="assets/music-icon.svg" alt="Music">
+            </button>
+
+            <button id="reset-btn" title="Reset Game">
+                <img src="assets/reset-icon.svg" alt="Reset">
+            </button>
         </div>
         <audio id="bg-music" src="assets/bg-music.mp3" loop></audio>
 

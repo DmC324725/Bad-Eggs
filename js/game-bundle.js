@@ -1,11 +1,10 @@
 /**
- * INTELLIGENT AUTO-MOVE GAME BUNDLE
+ * INTELLIGENT AUTO-MOVE GAME BUNDLE (FINAL FIXED VERSION)
  * ---------------------------------
- * Updates:
- * 1. AUTO-MOVE: If only one valid move exists, it happens automatically.
- * 2. AUTO-SKIP: If no moves are possible (e.g., roll is too high), the turn is skipped immediately (bonus rolls forfeit).
- * 3. 2/3/4 Player Modes fully supported.
- * 4. Bonus rolls for 6/12 and Kills retained (unless move is impossible).
+ * Fixes Included:
+ * 1. Strict Path Assertion (No ghost moves).
+ * 2. Red turn highlight fixed on start.
+ * 3. Music button connected to HTML audio.
  */
 
 (function() {
@@ -16,7 +15,7 @@
     window.DiceGame = window.DiceGame || {};
 
     /* ==========================================================================
-       PART 1: DICE GAME (THE GENERATOR)
+       PART 1: DICE GAME
        ========================================================================== */
 
     DiceGame.Config = {
@@ -262,7 +261,7 @@
             const countSel = document.getElementById('player-count-select');
             const count = countSel ? parseInt(countSel.value) : 4;
             
-            countSel.disabled = false;
+            if(countSel) countSel.disabled = false;
 
             if (count === 2) {
                 this.activeTeams = ['red', 'green'];
@@ -297,7 +296,9 @@
             this.turnIndex = 0;
             this.currentTurn = this.activeTeams[0];
             
+            // --- FIX 2: STARTING COLORS ---
             DiceGame.UI.resetVisuals();
+            LudoGame.UI.updateTurn(); // Apply Red Color immediately
             LudoGame.UI.updateRollButtonState();
         }
     };
@@ -467,8 +468,12 @@
         updateTurn: function() {
             if(!this.elements.turnDisplay) return;
             const turn = LudoGame.State.currentTurn;
-            this.elements.turnDisplay.innerText = turn.toUpperCase();
             this.elements.turnDisplay.style.backgroundColor = LudoGame.Config.TEAM_COLORS[turn];
+           this.elements.turnDisplay.style.transform = "scale(1.2)";
+            setTimeout(() => {
+                if(this.elements.turnDisplay) this.elements.turnDisplay.style.transform = "scale(1)";
+            }, 200);
+
             if(this.elements.board) {
                 this.elements.board.classList.remove('board-turn-red', 'board-turn-blue', 'board-turn-green', 'board-turn-yellow');
                 this.elements.board.classList.add(`board-turn-${turn}`);
@@ -538,7 +543,7 @@
     };
 
     LudoGame.Core = {
-        // --- NEW: Helper to find all legal moves for current dice ---
+        // --- Helper to find all legal moves for current dice ---
         getValidMoves: function(team, diceValue) {
             const validMoves = [];
             const path = LudoGame.Config.TEAM_PATHS[team];
@@ -695,6 +700,27 @@
             const Utils = LudoGame.Utils;
 
             try {
+                // --- FIX 1: STRICT PATH GUARD ---
+                // Validate that the pawn is moving EXACTLY on its path
+                const path = Config.TEAM_PATHS[pawn.team];
+                
+                // 1. Check if both Start and End exist in the path
+                const startIdx = path.indexOf(fromId);
+                const endIdx = path.indexOf(toId);
+
+                if (startIdx === -1 || endIdx === -1) {
+                    console.error(`VIOLATION: ${pawn.team} attempted to move off-path! ${fromId} -> ${toId}`);
+                    // Critical failure state - abort
+                    return; 
+                }
+
+                // 2. Integrity check: Cannot move backwards
+                if (endIdx <= startIdx) {
+                    console.error("VIOLATION: Attempted to move backwards.");
+                    return;
+                }
+                // --- GUARD END ---
+
                 State.saveHistory();
                 State.isAnimating = true;
                 if(UI.elements.modeBtn) UI.elements.modeBtn.disabled = true;
@@ -707,9 +733,6 @@
                 UI.renderContainer(fromId);
 
                 // Animate
-                const path = Config.TEAM_PATHS[pawn.team];
-                const startIdx = path.indexOf(fromId);
-                const endIdx = path.indexOf(toId);
                 const steps = path.slice(startIdx + 1, endIdx + 1);
                 await UI.animateMove(pawn.team, fromId, steps);
 
@@ -830,6 +853,7 @@
             }
             document.getElementById('reset-btn').click();
         });
+
         document.getElementById('reset-btn')?.addEventListener('click', () => {
             if (confirm("Reset Game?")) {
                 LudoGame.Audio.trigger('reset');
@@ -841,6 +865,29 @@
                 UI.updateWinners();
             }
         });
+
+        // --- FIX 3: MUSIC TOGGLE ---
+        const musicBtn = document.getElementById('music-btn');
+        const bgAudio = document.getElementById('bg-music');
+
+        if (musicBtn && bgAudio) {
+            // Optional: Set default volume so it isn't too loud
+            bgAudio.volume = 0.3; 
+
+            musicBtn.addEventListener('click', () => {
+                if (bgAudio.paused) {
+                    bgAudio.play().catch(e => console.warn("Audio play blocked:", e));
+                    musicBtn.classList.add('playing'); // <--- Matches the CSS
+                    // Update visual state (Active)
+                    musicBtn.style.opacity = "1"; 
+                } else {
+                    bgAudio.pause();
+                    // Update visual state (Inactive)
+                    musicBtn.style.opacity = "0.5";
+                    musicBtn.classList.remove('playing');
+                }
+            });
+        }
         
         // Manual Turn Control
         document.getElementById('prev-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(-1));
@@ -851,7 +898,7 @@
             DiceGame.Core.roll();
         });
         
-        // --- ONE CLICK AUTO-MOVE LOGIC ---
+        // --- ONE CLICK AUTO-MOVE LOGIC (STRICT) ---
         document.body.addEventListener('click', (event) => {
             if (State.isGameOver || State.isAnimating) return;
             const clickedContainer = event.target.closest('.pawn-container');
@@ -873,14 +920,29 @@
 
             const path = LudoGame.Config.TEAM_PATHS[pawn.team];
             const start = path.indexOf(containerId);
-            if (start === -1) return;
+            
+            // STRICT CHECK: Is current location in path?
+            if (start === -1) {
+                console.error("Critical: Clicked pawn is not on its assigned path.");
+                return;
+            }
 
             const moveVal = State.moveBank[State.selectedBankIndex];
             const endIdx = start + moveVal;
 
-            if (endIdx >= path.length) return; 
+            // STRICT CHECK: Is target location in path?
+            if (endIdx >= path.length) {
+                console.warn("Move exceeds path length. Action blocked.");
+                return; 
+            }
 
             const toId = path[endIdx];
+            // Double check that toId is actually in path array (redundant but safe)
+            if(!path.includes(toId)) {
+                console.error("Critical: Calculated destination is invalid.");
+                return;
+            }
+
             Core.performMove(containerId, toId, pawn);
         });
     }
