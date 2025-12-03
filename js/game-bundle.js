@@ -220,7 +220,7 @@
         finishedTeams: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
         teamsToSkip: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
         
-        // --- NEW: Track Kills ---
+        // --- CRITICAL: This must be present for kill logic to work ---
         hasKilled: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
         
         winnersList: [],
@@ -238,8 +238,7 @@
                 boardState: this.boardState,
                 finishedTeams: this.finishedTeams,
                 teamsToSkip: this.teamsToSkip,
-                // Save kill state
-                hasKilled: this.hasKilled,
+                hasKilled: this.hasKilled, // Save this too
                 winnersList: this.winnersList,
                 pairWinnerOrder: this.pairWinnerOrder,
                 globalMoveCounter: this.globalMoveCounter,
@@ -292,8 +291,6 @@
 
             this.finishedTeams = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
             this.teamsToSkip = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
-            
-            // Reset Kill Flags
             this.hasKilled = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
 
             this.winnersList = [];
@@ -552,13 +549,12 @@
     };
 
     LudoGame.Core = {
-        // --- VALID MOVES WITH 2 MAJOR RESTRICTIONS (Anchor & Gate) ---
         getValidMoves: function(team, diceValue) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             const Utils = LudoGame.Utils;
             
-            // 1. Determine Effective Team
+            // 1. Effective Team (Pair Mode Assist)
             let effectiveTeam = team;
             if (State.isPairMode && State.finishedTeams[team]) {
                 effectiveTeam = Utils.getTeammate(team);
@@ -574,7 +570,7 @@
 
             const validMoves = [];
             const path = Config.TEAM_PATHS[effectiveTeam]; 
-            const GATE_INDEX = 23; // The last cell of the outer loop
+            const GATE_INDEX = 23; 
 
             for (const [cellId, pawns] of Object.entries(State.boardState)) {
                 if (cellId === 'off-board-area') continue;
@@ -590,20 +586,14 @@
                     }
 
                     const currentIdx = path.indexOf(cellId);
-                    
                     if (currentIdx !== -1) {
                         let targetIdx = currentIdx + diceValue;
 
-                        // --- RESTRICTION B: KILL GATE (Layer 2 Lock) ---
-                        // If trying to pass the Gate (Index 23) AND hasn't killed yet...
+                        // --- RESTRICTION B: KILL GATE ---
                         if (targetIdx > GATE_INDEX && !State.hasKilled[effectiveTeam]) {
-                            // WRAP AROUND LOGIC:
-                            // Instead of entering Layer 2, they loop back to Start (Index 0)
-                            // Math: (24 becomes 0), (25 becomes 1), etc.
                             targetIdx = targetIdx - (GATE_INDEX + 1);
                         }
 
-                        // Boundary Check (Normal or Layer 2)
                         if (targetIdx < path.length) {
                             validMoves.push({
                                 fromId: cellId,
@@ -682,7 +672,6 @@
             } while (true);
             
             State.currentTurn = State.activeTeams[State.turnIndex];
-            
             State.moveBank = [];
             State.selectedBankIndex = -1;
             State.pendingRolls = 1;
@@ -708,7 +697,6 @@
 
         manualTurnChange: function(offset) {
             const State = LudoGame.State;
-            const Config = LudoGame.Config;
             if (State.isGameOver) return;
             LudoGame.UI.hidePopup();
             
@@ -745,12 +733,9 @@
             const Utils = LudoGame.Utils;
 
             try {
-                // Path Validation
                 const path = Config.TEAM_PATHS[pawn.team];
                 const startIdx = path.indexOf(fromId);
                 const endIdx = path.indexOf(toId);
-                
-                // Allow "Wrap Around" (endIdx < startIdx) ONLY if gate logic is active
                 if (startIdx === -1 || endIdx === -1) return;
 
                 State.saveHistory();
@@ -760,25 +745,19 @@
                 if (pSelect) pSelect.disabled = true;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
 
-                // Move Data Update
+                // 1. Move UI
                 State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
                 UI.renderContainer(fromId);
                 
-                // --- ANIMATION LOGIC (Handles Wrap Around) ---
                 let steps = [];
                 if (endIdx < startIdx) {
-                    // WRAP AROUND ANIMATION:
-                    // 1. Walk from Start -> Gate (Index 23)
-                    // 2. Jump/Walk from Index 0 -> End
                     const GATE_INDEX = 23;
                     const part1 = path.slice(startIdx + 1, GATE_INDEX + 1);
                     const part2 = path.slice(0, endIdx + 1);
                     steps = part1.concat(part2);
                 } else {
-                    // Standard Move
                     steps = path.slice(startIdx + 1, endIdx + 1);
                 }
-
                 await UI.animateMove(pawn.team, fromId, steps);
                 
                 pawn.arrival = State.globalMoveCounter++;
@@ -790,35 +769,44 @@
                     if(State.moveBank.length > 0) State.selectedBankIndex = 0;
                 }
 
-                // Kill Logic
+                // 2. Hardened Kill Logic
                 const isSpecial = Config.SPECIAL_BLOCKS.includes(toId);
                 const isOff = toId === 'off-board-area';
-                if (!isSpecial && !isOff) {
+
+                if (!isOff) {
                     const pawnsInDest = State.boardState[toId];
-                    const victims = pawnsInDest.filter(p => p.team !== pawn.team && !Utils.isTeammate(p.team, pawn.team));
+                    const victims = pawnsInDest.filter(p => 
+                        p.id !== pawn.id && 
+                        p.team !== pawn.team && 
+                        !Utils.isTeammate(p.team, pawn.team)
+                    );
                     
                     if (victims.length > 0) {
-                        // --- UNLOCK GATE LOGIC ---
-                        State.hasKilled[pawn.team] = true; // Unlock for self
-                        if (State.isPairMode) {
-                            const partner = Utils.getTeammate(pawn.team);
-                            State.hasKilled[partner] = true; // Unlock for partner
-                            console.log(`KILL! Gate unlocked for ${pawn.team} and ${partner}.`);
+                        if (isSpecial) {
+                            console.log(`Kill Prevented: Safe Zone.`);
                         } else {
-                             console.log(`KILL! Gate unlocked for ${pawn.team}.`);
+                            // KILL SUCCESS
+                            if (State.hasKilled) {
+                                State.hasKilled[pawn.team] = true;
+                                if (State.isPairMode) {
+                                    const partner = Utils.getTeammate(pawn.team);
+                                    State.hasKilled[partner] = true;
+                                }
+                            }
+                            
+                            const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
+                            const home = Config.HOME_BASE_MAP[victim.team];
+                            State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
+                            State.boardState[home].push(victim);
+                            
+                            Audio.trigger('kill');
+                            State.pendingRolls++; 
+                            setTimeout(() => Audio.trigger('return'), 400);
                         }
-
-                        const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
-                        const home = Config.HOME_BASE_MAP[victim.team];
-                        State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
-                        State.boardState[home].push(victim);
-                        Audio.trigger('kill');
-                        State.pendingRolls++; 
-                        setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
 
-                // Win Logic
+                // 3. Win Logic
                 if (isOff) {
                     Audio.trigger('finish');
                     const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
@@ -852,6 +840,7 @@
                 UI.renderBoard();
                 UI.renderMoveBank();
 
+                // 4. Advance Turn
                 if (State.pendingRolls === 0 && State.moveBank.length === 0) {
                     this.advanceTurn();
                 } else {
@@ -860,6 +849,7 @@
 
             } catch (error) {
                 console.error("Move Failed:", error);
+                // Ensure board is consistent if crash happens
                 UI.renderBoard();
             } finally {
                 State.isAnimating = false;
