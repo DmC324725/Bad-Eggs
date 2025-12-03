@@ -27,23 +27,79 @@
 }
 
 /* Mobile Phones */
+/* Mobile Phones */
 @media (max-width: 680px) {
 
-    /* Stack the top controls bar */
+    /* --- 1. THE SCROLLING HEADER FIX --- */
     .controls {
-        flex-direction: column;
-        align-items: center;
+        /* 1. Restore the "Box" Look */
+        width: 95% !important;        /* Pull away from screen edges */
+        max-width: 100% !important;
+        margin: 0 auto 10px auto !important; /* Center it nicely */
+        
+        /* 2. Bring back the borders */
+        border: 2px solid #444 !important; 
+        border-radius: 12px !important;      
+        
+        /* 3. The Horizontal Scroll Logic */
+        display: flex;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        justify-content: flex-start !important;
+        
+        /* 4. Internal Spacing */
+        padding: 10px 15px !important; /* Add breathing room inside the borders */
+        gap: 12px; /* Consistent gap between items */
+        
+        /* Smooth scrolling */
+        -webkit-overflow-scrolling: touch; 
+        
+        /* Optional: Scroll Snap makes it feel 'app-like' */
+        scroll-snap-type: x mandatory;
     }
 
-    .control-group {
-        justify-content: center;
+    /* CRITICAL: Prevent items from squishing or wrapping */
+    .controls > div,
+    .controls > button {
+        flex-shrink: 0 !important; /* Prevents items from getting tiny */
+        margin-right: 12px; /* Adds space between the scrollable items */
     }
 
-    /* Shrink the board size */
+    /* Hide the scrollbar visually but keep functionality (Optional) */
+    .controls::-webkit-scrollbar {
+        height: 4px; /* Tiny scrollbar if visible */
+    }
+    .controls::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 2px;
+    }
+
+    /* --- 2. GAME BOARD & SIDEBAR ADJUSTMENTS --- */
+    /* Shrink the board size slightly for small screens */
     #game-board {
         grid-template-columns: repeat(7, 44px);
         grid-template-rows: repeat(7, 44px);
         border-width: 3px;
+    }
+
+    /* --- FIX: RE-ALIGN LAYER BORDERS FOR MOBILE --- */
+    /* Since grid cells are now 44px, the borders need to match */
+    
+    /* The First Ring (Outer -> Middle) */
+    #game-board::before {
+        top: 44px;
+        left: 44px;
+        right: 44px;
+        bottom: 44px;
+    }
+
+    /* The Second Ring (Middle -> Inner) */
+    #game-board::after {
+        top: 88px;   /* 44px * 2 */
+        left: 88px;
+        right: 88px;
+        bottom: 88px;
     }
 
     .grid-cell {
@@ -51,10 +107,16 @@
         min-height: 44px;
     }
 
-    /* Ensure dice roller fits width */
-    .sidebar {
+    /* Move sidebar below board */
+    .full-game-wrapper {
         flex-direction: column;
         align-items: center;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row; /* Keep sidebar items side-by-side if they fit */
+        justify-content: center;
     }
 
     .dice-roller {
