@@ -1165,7 +1165,7 @@
         const UI = LudoGame.UI;
         const State = LudoGame.State;
 
-        document.getElementById('undo-btn') ? .addEventListener('click', () => Core.reverseLastMove());
+        document.getElementById('undo-btn')?.addEventListener('click', () => Core.reverseLastMove());
 
         // Player Count Change Listener
         const pCount = document.getElementById('player-count-select');
@@ -1176,7 +1176,7 @@
         }
 
         // Mode Toggle (Solo vs Pair)
-        document.getElementById('mode-toggle') ? .addEventListener('click', () => {
+        document.getElementById('mode-toggle')?.addEventListener('click', () => {
             State.isPairMode = !State.isPairMode;
 
             const icon = document.querySelector('#mode-toggle img');
@@ -1196,7 +1196,7 @@
         });
 
         // Reset Game Button
-        document.getElementById('reset-btn') ? .addEventListener('click', () => {
+        document.getElementById('reset-btn')?.addEventListener('click', () => {
             if (confirm("Reset Game?")) {
                 LudoGame.Audio.trigger('reset');
                 State.reset();
@@ -1251,11 +1251,11 @@
         }
 
         // Manual Turn Controls (Debug/Override)
-        document.getElementById('prev-turn-btn') ? .addEventListener('click', () => Core.manualTurnChange(-1));
-        document.getElementById('next-turn-btn') ? .addEventListener('click', () => Core.manualTurnChange(1));
+        document.getElementById('prev-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(-1));
+        document.getElementById('next-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(1));
 
         // Dice Roll Trigger
-        document.getElementById('roll-button') ? .addEventListener('click', () => {
+        document.getElementById('roll-button')?.addEventListener('click', () => {
             DiceGame.Core.roll();
         });
 
