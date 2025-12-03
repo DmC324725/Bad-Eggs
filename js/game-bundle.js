@@ -84,7 +84,6 @@
                 dice: document.querySelectorAll('.dice'),
                 display: document.getElementById('result-display'),
                 btn: document.getElementById('roll-button'),
-                resetBtn: document.getElementById('reset-dice-btn'),
                 confetti: document.getElementById('confetti-container')
             };
             return !!this.elements.btn;
@@ -521,7 +520,7 @@
             const canRoll = LudoGame.State.pendingRolls > 0 && !LudoGame.State.isGameOver && !LudoGame.State.isAnimating;
             btn.disabled = !canRoll;
             btn.style.opacity = canRoll ? "1" : "0.5";
-            btn.innerText = canRoll ? "Roll Dice" : (LudoGame.State.moveBank.length > 0 ? "Move Pawn" : "Wait");
+            btn.innerText = canRoll ? "Roll" : (LudoGame.State.moveBank.length > 0 ? "Move Pawn" : "Wait");
         },
         // Update the visual indicator of whose turn it is
         updateTurn: function() {
