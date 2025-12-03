@@ -152,11 +152,12 @@
 /* --- 4. Status Panels (Winners / Off Board) --- */
 /* --- SHARED PILL STYLE --- */
 .info-pill {
-    height: 32px;
+    display: none;
+    /* height: 32px;
     display: flex;
     align-items: center;
     
-    background-color: #1e293b; /* Dark Slate */
+    background-color: #1e293b; 
     border: 1px solid #334155;
     border-radius: 50px;
     padding: 0 12px;
@@ -166,7 +167,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     min-width: 100px; 
     overflow: hidden;
-    transition: width 0.3s ease;
+    transition: width 0.3s ease; */
 }
 
 .pill-icon {
@@ -203,8 +204,9 @@
 
 /* --- OFF BOARD PAWNS --- */
 #off-board-area {
-    display: flex;
-    align-items: center;
+    display: none;
+    /* display: flex;
+    align-items: center; */
 }
 
 /* Important: Scale down the pawns so they fit inside the pill */
