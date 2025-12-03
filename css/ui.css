@@ -287,3 +287,67 @@
 #music-btn:hover {
     opacity: 0.9;
 }
+
+#mode-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007bff; /* Blue button */
+  border: none;
+  
+  /* Flexbox is vital for centering the image */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn-icon {
+  width: 24px;   /* Size of the icon inside the button */
+  height: 24px;
+  
+  /* THIS IS THE TRICK: */
+  /* If your SVG is pure black, this flips it to pure white */
+  filter: invert(100%); 
+}
+
+/* 2. Define the Hover State */
+#mode-toggle:hover {
+  /* Make background slightly darker */
+  background-color: #0056b3; 
+  
+  /* Make the button grow slightly (optional but looks nice) */
+  transform: scale(1.1);
+  
+  /* Add a shadow for depth */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Optional: Active state (when you actually click/press down) */
+#mode-toggle:active {
+  transform: scale(0.95); /* Shrink slightly on click */
+  box-shadow: none;
+}
+
+/* Base style for the dropdown */
+#player-count-select {
+  font-size: 16px;
+  padding: 8px 12px; /* A bit more padding for comfort */
+  border-radius: 20px; /* Matches the rounded look of your circular button */
+  border: 2px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+#player-count-select:hover {
+  border-color: #007bff; /* Highlights blue on hover */
+}
+
+/* THE IMPORTANT PART: Styling the Disabled State */
+/* This triggers when your JS runs: sel.disabled = true */
+#player-count-select:disabled {
+  display: none;
+}

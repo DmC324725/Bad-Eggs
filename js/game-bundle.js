@@ -262,6 +262,8 @@
             const countSel = document.getElementById('player-count-select');
             const count = countSel ? parseInt(countSel.value) : 4;
             
+            countSel.disabled = false;
+
             if (count === 2) {
                 this.activeTeams = ['red', 'green'];
             } else if (count === 3) {
@@ -814,7 +816,13 @@
 
         document.getElementById('mode-toggle')?.addEventListener('click', () => {
             State.isPairMode = !State.isPairMode;
-            UI.elements.modeDisplay.innerText = State.isPairMode ? 'Team Mode' : 'Solo Mode';
+
+            const icon = document.querySelector('#mode-toggle img');
+            if (icon) {
+                // Swap the file path based on the state
+                icon.src = State.isPairMode ? 'assets/duo-icon.svg' : 'assets/solo-icon.svg';
+            }
+
             const sel = document.getElementById('player-count-select');
             if(sel) {
                 if(State.isPairMode) { sel.value = "4"; sel.disabled = true; }
