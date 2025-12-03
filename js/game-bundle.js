@@ -543,19 +543,31 @@
     };
 
     LudoGame.Core = {
-        // --- Helper to find all legal moves for current dice ---
+        // --- 1. LOGIC FIX: Check Partner's pawns if current player is finished ---
         getValidMoves: function(team, diceValue) {
-            const validMoves = [];
-            const path = LudoGame.Config.TEAM_PATHS[team];
+            const State = LudoGame.State;
+            const Utils = LudoGame.Utils;
+            
+            // Determine "Effective Team"
+            // If Pair Mode AND Current Team is finished, they play for their partner
+            let effectiveTeam = team;
+            if (State.isPairMode && State.finishedTeams[team]) {
+                effectiveTeam = Utils.getTeammate(team);
+                // Safety: If partner is ALSO finished, no moves possible (Game Over logic handles this elsewhere)
+                if (State.finishedTeams[effectiveTeam]) return [];
+            }
 
-            // Scan board state for pawns of this team
-            for (const [cellId, pawns] of Object.entries(LudoGame.State.boardState)) {
+            const validMoves = [];
+            const path = LudoGame.Config.TEAM_PATHS[effectiveTeam]; // Use effective team path
+
+            // Scan board state
+            for (const [cellId, pawns] of Object.entries(State.boardState)) {
                 if (cellId === 'off-board-area') continue;
 
-                // Check if this cell has pawns of the current team
-                const teamPawns = pawns.filter(p => p.team === team);
+                // Check for pawns of the EFFECTIVE team
+                const teamPawns = pawns.filter(p => p.team === effectiveTeam);
+                
                 if (teamPawns.length > 0) {
-                    // Logic: If multiple pawns are on one cell, they are "one" move option source
                     const pawn = teamPawns[0]; 
                     const currentIdx = path.indexOf(cellId);
                     
@@ -579,7 +591,7 @@
             State.moveBank.push(score);
             State.pendingRolls--; 
             
-            // 1. Bonus Roll Logic (Default)
+            // 1. Bonus Roll Logic
             let bonusEarned = false;
             if (score === 6 || score === 12) {
                 bonusEarned = true;
@@ -613,7 +625,10 @@
                 LudoGame.UI.updateRollButtonState();
             }
         },
+
         clearSelection: function() { },
+
+        // --- 2. LOGIC FIX: Handle the "One Time Skip" ---
         advanceTurn: function() {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
@@ -622,6 +637,7 @@
             
             do {
                 const totalActive = State.activeTeams.length;
+                // Calculate next index
                 if (State.isTurnOrderReversed) {
                     State.turnIndex = (State.turnIndex - 1 + totalActive) % totalActive;
                 } else {
@@ -630,12 +646,22 @@
                 
                 const next = State.activeTeams[State.turnIndex];
                 
-                if (State.isPairMode && State.teamsToSkip[next]) {
-                    State.teamsToSkip[next] = false;
-                } else if (!State.isPairMode && State.finishedTeams[next]) {
-                    continue;
-                } else {
+                if (State.isPairMode) {
+                    // CHECK SKIP FLAG
+                    if (State.teamsToSkip[next] === true) {
+                        console.log(`Skipping ${next} (One turn penalty after finishing)`);
+                        State.teamsToSkip[next] = false; // Consume the skip!
+                        continue; // Move to the player after this one
+                    }
+                    // If flag is false, they play (even if finished, to help partner)
                     break;
+                } else {
+                    // Solo Mode: Skip anyone who is finished
+                    if (State.finishedTeams[next]) {
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
             } while (true);
             
@@ -649,6 +675,7 @@
             UI.updateRollButtonState();
             DiceGame.UI.resetVisuals();
         },
+
         reverseLastMove: function() {
             const State = LudoGame.State;
             const UI = LudoGame.UI;
@@ -662,6 +689,7 @@
                 LudoGame.Audio.trigger('return');
             }
         },
+
         manualTurnChange: function(offset) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
@@ -692,6 +720,7 @@
             LudoGame.UI.updateRollButtonState();
             DiceGame.UI.resetVisuals();
         },
+
         performMove: async function(fromId, toId, pawn) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
@@ -700,26 +729,11 @@
             const Utils = LudoGame.Utils;
 
             try {
-                // --- FIX 1: STRICT PATH GUARD ---
-                // Validate that the pawn is moving EXACTLY on its path
+                // Path Validation
                 const path = Config.TEAM_PATHS[pawn.team];
-                
-                // 1. Check if both Start and End exist in the path
                 const startIdx = path.indexOf(fromId);
                 const endIdx = path.indexOf(toId);
-
-                if (startIdx === -1 || endIdx === -1) {
-                    console.error(`VIOLATION: ${pawn.team} attempted to move off-path! ${fromId} -> ${toId}`);
-                    // Critical failure state - abort
-                    return; 
-                }
-
-                // 2. Integrity check: Cannot move backwards
-                if (endIdx <= startIdx) {
-                    console.error("VIOLATION: Attempted to move backwards.");
-                    return;
-                }
-                // --- GUARD END ---
+                if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return;
 
                 State.saveHistory();
                 State.isAnimating = true;
@@ -728,19 +742,14 @@
                 if (pSelect) pSelect.disabled = true;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
 
-                // Visual Move
+                // Move
                 State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
                 UI.renderContainer(fromId);
-
-                // Animate
                 const steps = path.slice(startIdx + 1, endIdx + 1);
                 await UI.animateMove(pawn.team, fromId, steps);
-
-                // Update Data
                 pawn.arrival = State.globalMoveCounter++;
                 State.boardState[toId].push(pawn);
 
-                // Consume Move
                 if (State.selectedBankIndex > -1) {
                     State.moveBank.splice(State.selectedBankIndex, 1);
                     State.selectedBankIndex = -1;
@@ -759,9 +768,7 @@
                         State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                         State.boardState[home].push(victim);
                         Audio.trigger('kill');
-                        
-                        State.pendingRolls++; // Bonus Roll for Kill
-                        
+                        State.pendingRolls++; 
                         setTimeout(() => Audio.trigger('return'), 400);
                     }
                 }
@@ -770,10 +777,15 @@
                 if (isOff) {
                     Audio.trigger('finish');
                     const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
+                    
                     if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
                         State.finishedTeams[pawn.team] = true;
+
+                        // --- 3. LOGIC FIX: Set Skip Flag ---
                         if (State.isPairMode) {
-                            State.teamsToSkip[pawn.team] = true;
+                            // Set the flag to skip EXACTLY the next turn
+                            State.teamsToSkip[pawn.team] = true; 
+                            
                             const partner = Utils.getTeammate(pawn.team);
                             if (State.finishedTeams[partner]) {
                                 State.isGameOver = true;
@@ -785,10 +797,10 @@
                                 Audio.trigger('gameover');
                             }
                         } else {
+                            // Solo Mode
                             State.winnersList.push(pawn.team);
                             UI.updateWinners();
-                            const totalPlayers = State.activeTeams.length;
-                            if (State.winnersList.length === (totalPlayers - 1)) {
+                            if (State.winnersList.length === (State.activeTeams.length - 1)) {
                                 State.isGameOver = true;
                                 Audio.trigger('gameover');
                             }
@@ -799,7 +811,6 @@
                 UI.renderBoard();
                 UI.renderMoveBank();
 
-                // Turn Logic
                 if (State.pendingRolls === 0 && State.moveBank.length === 0) {
                     this.advanceTurn();
                 } else {
