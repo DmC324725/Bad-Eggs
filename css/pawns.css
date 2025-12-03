@@ -13,7 +13,7 @@
     box-sizing: border-box;
     position: relative;
     box-shadow: inset -2px -4px 6px rgba(0, 0, 0, 0.3), 0 4px 4px rgba(0, 0, 0, 0.2);
-    
+
     /* === NEW: Jumpy Animation === */
     /* 2s duration: quick jump then wait */
     animation: egg-bounce 1s infinite ease-in-out;
@@ -21,10 +21,21 @@
 
 /* === NEW: Stagger the jumps so they don't move in sync === */
 /* Using nth-child to add random-feeling delays */
-.pawn-stack:nth-child(1) { animation-delay: 0.0s; }
-.pawn-stack:nth-child(2) { animation-delay: 0.2s; }
-.pawn-stack:nth-child(3) { animation-delay: 0.4s; }
-.pawn-stack:nth-child(4) { animation-delay: 1.6s; }
+.pawn-stack:nth-child(1) {
+    animation-delay: 0.0s;
+}
+
+.pawn-stack:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.pawn-stack:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.pawn-stack:nth-child(4) {
+    animation-delay: 1.6s;
+}
 
 /* --- 2. Team Colors (Radial Gradients for 3D look) --- */
 .pawn-stack-red {
@@ -72,33 +83,57 @@
 
 /* === NEW: The Jump Keyframes === */
 @keyframes egg-bounce {
-    0%, 100% { transform: translateY(0); }
-    10% { transform: translateY(-5px); } /* Jump up */
-    15% { transform: translateY(0); }    /* Land */
-    25% { transform: translateY(-2px); } /* Tiny after-hop */
-    30% { transform: translateY(0); }    /* Land & Rest */
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    10% {
+        transform: translateY(-5px);
+    }
+
+    /* Jump up */
+    15% {
+        transform: translateY(0);
+    }
+
+    /* Land */
+    25% {
+        transform: translateY(-2px);
+    }
+
+    /* Tiny after-hop */
+    30% {
+        transform: translateY(0);
+    }
+
+    /* Land & Rest */
 }
 
 .pawn-stack.selected-pawn {
     border-color: #00ffff;
     /* Combine animations: Keep bouncing, but add the shimmer */
-    animation: 
-        egg-bounce 1s infinite ease-in-out, 
+    animation:
+        egg-bounce 1s infinite ease-in-out,
         pawn-shimmer 1.5s infinite;
 }
 
 /* --- 5. Floating Animation (Movement) --- */
 .floating-pawn {
-    width: 22px;  /* Match the static pawn size */
+    width: 22px;
+    /* Match the static pawn size */
     height: 30px;
-    
-    border-radius: 50% / 60% 60% 40% 40%; /* Match egg shape */
-    
-    border: 2px solid rgba(0,0,0,0.5);
+
+    border-radius: 50% / 60% 60% 40% 40%;
+    /* Match egg shape */
+
+    border: 2px solid rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     position: absolute;
-    z-index: 1000; 
+    z-index: 1000;
     transition: transform 0.25s linear;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4); /* Higher shadow while flying */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    /* Higher shadow while flying */
     pointer-events: none;
 }

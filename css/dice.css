@@ -198,7 +198,7 @@
 /* === NEW: MOVE BANK STYLES === */
 #move-bank-display {
     width: 100%;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 15px;
@@ -213,7 +213,7 @@
     color: white;
     font-weight: bold;
     font-size: 18px;
-    border: 2px solid rgba(255,255,255,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     cursor: pointer;
     transition: transform 0.1s;
     display: flex;
@@ -227,7 +227,8 @@
 }
 
 .bank-item.selected {
-    background-color: #22d3ee; /* Cyan */
+    background-color: #22d3ee;
+    /* Cyan */
     color: #000;
     border-color: #fff;
     box-shadow: 0 0 10px #22d3ee;

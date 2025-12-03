@@ -13,7 +13,7 @@
  * =============================================================================
  */
 
-(function() {
+(function () {
     "use strict";
 
     // --- NAMESPACE INITIALIZATION ---
@@ -27,9 +27,9 @@
        ========================================================================== */
 
     DiceGame.Config = {
-        NUM_DICE: 6,           // Number of dice to roll visually
-        MIN_ROLL_TIME: 400,    // Minimum animation duration (ms)
-        MAX_ROLL_TIME: 1200,   // Maximum animation duration (ms)
+        NUM_DICE: 6, // Number of dice to roll visually
+        MIN_ROLL_TIME: 400, // Minimum animation duration (ms)
+        MAX_ROLL_TIME: 1200, // Maximum animation duration (ms)
         // Colors used for the confetti explosion on a roll of 12
         CONFETTI_COLORS: ['confetti-yellow', 'confetti-cyan', 'confetti-pink', 'confetti-lime']
     };
@@ -45,39 +45,128 @@
     // --- AUDIO SYNTHESIS (Tone.js) ---
     // Initializes synthesizers only when needed to adhere to browser autoplay policies.
     let diceSynths = null;
+
     function getDiceSynths() {
         if (diceSynths) return diceSynths;
         try {
             if (window.Tone) {
                 diceSynths = {
                     // Percussive sound for shaking
-                    rattle: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination(),
+                    rattle: new Tone.MembraneSynth({
+                        pitchDecay: 0.01,
+                        octaves: 2,
+                        envelope: {
+                            attack: 0.001,
+                            decay: 0.1,
+                            sustain: 0
+                        }
+                    }).toDestination(),
                     // Thud sound for landing
-                    land: new Tone.MembraneSynth({ pitchDecay: 0.005, octaves: 3, envelope: { attack: 0.001, decay: 0.05, sustain: 0 } }).toDestination(),
+                    land: new Tone.MembraneSynth({
+                        pitchDecay: 0.005,
+                        octaves: 3,
+                        envelope: {
+                            attack: 0.001,
+                            decay: 0.05,
+                            sustain: 0
+                        }
+                    }).toDestination(),
                     // Special sound for high rolls
-                    special: new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.5 } }).toDestination(),
+                    special: new Tone.Synth({
+                        oscillator: {
+                            type: 'triangle'
+                        },
+                        envelope: {
+                            attack: 0.005,
+                            decay: 0.1,
+                            sustain: 0.3,
+                            release: 0.5
+                        }
+                    }).toDestination(),
                     // Noise textures for celebration
-                    shaker6: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.15, sustain: 0 } }).toDestination(),
-                    shaker12: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.4, sustain: 0 } }).toDestination(),
-                    clap: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 4, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination()
+                    shaker6: new Tone.NoiseSynth({
+                        noise: {
+                            type: 'white'
+                        },
+                        envelope: {
+                            attack: 0.005,
+                            decay: 0.15,
+                            sustain: 0
+                        }
+                    }).toDestination(),
+                    shaker12: new Tone.NoiseSynth({
+                        noise: {
+                            type: 'white'
+                        },
+                        envelope: {
+                            attack: 0.005,
+                            decay: 0.4,
+                            sustain: 0
+                        }
+                    }).toDestination(),
+                    clap: new Tone.MembraneSynth({
+                        pitchDecay: 0.01,
+                        octaves: 4,
+                        envelope: {
+                            attack: 0.001,
+                            decay: 0.1,
+                            sustain: 0
+                        }
+                    }).toDestination()
                 };
             }
-        } catch(e) { console.warn("Audio init failed", e); }
+        } catch (e) {
+            console.warn("Audio init failed", e);
+        }
         return diceSynths;
     }
 
     DiceGame.Audio = {
-        init: function() { try { if(window.Tone && Tone.context.state !== 'running') Tone.start().catch(() => {}); getDiceSynths(); } catch(e) {} },
-        playRattle: function() { try { const s = getDiceSynths(); if(s) { s.rattle.triggerAttackRelease("C1", "8n", Tone.now()); s.rattle.triggerAttackRelease("G0", "8n", Tone.now() + 0.08); } } catch(e) {} },
-        playLand: function() { try { const s = getDiceSynths(); if(s) s.land.triggerAttackRelease("C2", "8n", Tone.now()); } catch(e) {} },
-        playCelebration6: function() { try { const s = getDiceSynths(); if(s) { s.shaker6.triggerAttackRelease(Tone.now()); s.clap.triggerAttackRelease("C3", "8n", Tone.now() + 0.01); } } catch(e) {} },
-        playCelebration12: function() { try { const s = getDiceSynths(); if(s) { s.shaker12.triggerAttackRelease(Tone.now()); s.special.triggerAttackRelease("G5", "8n", Tone.now() + 0.05); } } catch(e) {} }
+        init: function () {
+            try {
+                if (window.Tone && Tone.context.state !== 'running') Tone.start().catch(() => {});
+                getDiceSynths();
+            } catch (e) {}
+        },
+        playRattle: function () {
+            try {
+                const s = getDiceSynths();
+                if (s) {
+                    s.rattle.triggerAttackRelease("C1", "8n", Tone.now());
+                    s.rattle.triggerAttackRelease("G0", "8n", Tone.now() + 0.08);
+                }
+            } catch (e) {}
+        },
+        playLand: function () {
+            try {
+                const s = getDiceSynths();
+                if (s) s.land.triggerAttackRelease("C2", "8n", Tone.now());
+            } catch (e) {}
+        },
+        playCelebration6: function () {
+            try {
+                const s = getDiceSynths();
+                if (s) {
+                    s.shaker6.triggerAttackRelease(Tone.now());
+                    s.clap.triggerAttackRelease("C3", "8n", Tone.now() + 0.01);
+                }
+            } catch (e) {}
+        },
+        playCelebration12: function () {
+            try {
+                const s = getDiceSynths();
+                if (s) {
+                    s.shaker12.triggerAttackRelease(Tone.now());
+                    s.special.triggerAttackRelease("G5", "8n", Tone.now() + 0.05);
+                }
+            } catch (e) {}
+        }
     };
 
     // --- DICE VISUAL MANAGER ---
     DiceGame.UI = {
         elements: {},
-        init: function() {
+        init: function () {
             // Cache DOM elements for performance
             this.elements = {
                 container: document.getElementById('dice-container'),
@@ -88,33 +177,33 @@
             };
             return !!this.elements.btn;
         },
-        setResult: function(text, classType) {
-            if(!this.elements.display) return;
+        setResult: function (text, classType) {
+            if (!this.elements.display) return;
             this.elements.display.innerText = text;
             this.elements.display.className = '';
             if (classType) this.elements.display.classList.add(classType);
         },
-        resetVisuals: function() {
-            if(!this.elements.display) return;
+        resetVisuals: function () {
+            if (!this.elements.display) return;
             this.elements.display.innerText = '0';
             this.elements.display.className = '';
-            if(this.elements.dice) {
+            if (this.elements.dice) {
                 this.elements.dice.forEach(die => {
                     die.innerHTML = `<div>${DiceGame.SVGs.face0}</div>`;
                     die.className = 'dice dice-bg-0';
                 });
             }
-            if(this.elements.confetti) this.elements.confetti.innerHTML = '';
+            if (this.elements.confetti) this.elements.confetti.innerHTML = '';
         },
-        setDieLoading: function() {
-            if(!this.elements.dice) return;
+        setDieLoading: function () {
+            if (!this.elements.dice) return;
             this.elements.dice.forEach(die => {
                 die.innerHTML = `<div>${DiceGame.SVGs.rolling}</div>`;
                 die.className = 'dice dice-bg-rolling';
             });
         },
-        updateDieFace: function(index, value) {
-            if(!this.elements.dice || !this.elements.dice[index]) return;
+        updateDieFace: function (index, value) {
+            if (!this.elements.dice || !this.elements.dice[index]) return;
             const die = this.elements.dice[index];
             // Swap SVG based on 0 or 1 result
             if (value === 0) {
@@ -125,9 +214,9 @@
                 die.className = 'dice dice-bg-1';
             }
         },
-        triggerConfetti: function() {
+        triggerConfetti: function () {
             // Generates simple DOM-based particles for celebration
-            if(!this.elements.confetti) return;
+            if (!this.elements.confetti) return;
             const colors = DiceGame.Config.CONFETTI_COLORS;
             for (let i = 0; i < 30; i++) {
                 const piece = document.createElement('div');
@@ -147,7 +236,7 @@
 
     // --- DICE LOGIC CORE ---
     DiceGame.Core = {
-        roll: function(forcedRolls = null) {
+        roll: function (forcedRolls = null) {
             // Guard clause: Don't roll if no rolls pending or animation in progress
             if (window.LudoGame.State.pendingRolls <= 0 || window.LudoGame.State.isAnimating) return;
 
@@ -157,7 +246,7 @@
             DiceGame.Audio.playRattle();
 
             const btn = document.getElementById('roll-button');
-            if(btn) btn.disabled = true;
+            if (btn) btn.disabled = true;
 
             let diceLandedCount = 0;
             let sum = 0;
@@ -166,7 +255,7 @@
 
             // Failsafe timeout to ensure game proceeds even if animation hangs
             setTimeout(() => {
-                if(!finished) {
+                if (!finished) {
                     finished = true;
                     DiceGame.Core.finalizeRoll(sum > 0 ? sum : 4);
                 }
@@ -179,7 +268,7 @@
                 const duration = Math.random() * (config.MAX_ROLL_TIME - config.MIN_ROLL_TIME) + config.MIN_ROLL_TIME;
 
                 setTimeout(() => {
-                    if(finished) return;
+                    if (finished) return;
                     DiceGame.UI.updateDieFace(i, result);
                     DiceGame.Audio.playLand();
                     diceLandedCount++;
@@ -193,11 +282,11 @@
             }
         },
 
-        finalizeRoll: function(total) {
+        finalizeRoll: function (total) {
             // Special Rule: If total is 0, it counts as 12 (Maximum)
             const finalScore = (total === 0) ? 12 : total;
             let resultClass = 'dice-result-normal';
-            
+
             if (finalScore === 12) {
                 resultClass = 'dice-result-12';
                 DiceGame.Audio.playCelebration12();
@@ -206,9 +295,9 @@
                 resultClass = 'dice-result-6';
                 DiceGame.Audio.playCelebration6();
             }
-            
+
             DiceGame.UI.setResult(finalScore, resultClass);
-            
+
             // Handover control to Ludo Game Core
             if (window.LudoGame && window.LudoGame.Core) {
                 window.LudoGame.Core.onDiceRolled(finalScore);
@@ -224,11 +313,21 @@
         ROWS: 7,
         COLS: 7,
         // Maps team colors to their starting div IDs
-        HOME_BASE_MAP: { 'red': 'cell-0-3', 'blue': 'cell-3-0', 'green': 'cell-6-3', 'yellow': 'cell-3-6' },
+        HOME_BASE_MAP: {
+            'red': 'cell-0-3',
+            'blue': 'cell-3-0',
+            'green': 'cell-6-3',
+            'yellow': 'cell-3-6'
+        },
         // Cells where pawns cannot be killed (Globes/Starts)
         SPECIAL_BLOCKS: ['cell-0-3', 'cell-3-0', 'cell-6-3', 'cell-3-6', 'cell-3-3'],
         TURN_ORDER: ['red', 'blue', 'green', 'yellow'],
-        TEAM_COLORS: { 'red': '#e53935', 'blue': '#1e88e5', 'green': '#43a047', 'yellow': '#fdd835' },
+        TEAM_COLORS: {
+            'red': '#e53935',
+            'blue': '#1e88e5',
+            'green': '#43a047',
+            'yellow': '#fdd835'
+        },
         // Hardcoded paths for every team. Crucial for the "Strict Path" logic.
         TEAM_PATHS: {
             'red': ['cell-0-3', 'cell-0-2', 'cell-0-1', 'cell-0-0', 'cell-1-0', 'cell-2-0', 'cell-3-0', 'cell-4-0', 'cell-5-0', 'cell-6-0', 'cell-6-1', 'cell-6-2', 'cell-6-3', 'cell-6-4', 'cell-6-5', 'cell-6-6', 'cell-5-6', 'cell-4-6', 'cell-3-6', 'cell-2-6', 'cell-1-6', 'cell-0-6', 'cell-0-5', 'cell-0-4', 'cell-1-5', 'cell-2-5', 'cell-3-5', 'cell-4-5', 'cell-5-5', 'cell-5-4', 'cell-5-3', 'cell-5-2', 'cell-5-1', 'cell-4-1', 'cell-3-1', 'cell-2-1', 'cell-1-1', 'cell-1-2', 'cell-1-3', 'cell-1-4', 'cell-2-4', 'cell-3-4', 'cell-4-4', 'cell-4-3', 'cell-4-2', 'cell-3-2', 'cell-2-2', 'cell-2-3', 'cell-3-3', 'off-board-area'],
@@ -244,34 +343,49 @@
         activeTeams: [],
         selectedPawnInfo: null,
         globalMoveCounter: 0, // Unique ID generation for pawns
-        boardState: {},       // Maps 'cell-id' => [pawnObjects]
+        boardState: {}, // Maps 'cell-id' => [pawnObjects]
         turnIndex: 0,
         currentTurn: 'red',
         tempDestinationId: null,
-        
+
         // Win Tracking
-        finishedTeams: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
-        
+        finishedTeams: {
+            'red': false,
+            'blue': false,
+            'green': false,
+            'yellow': false
+        },
+
         // Skip Flag: If a team finishes in Pair Mode, they skip ONE turn then play for partner
-        teamsToSkip: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
-        
+        teamsToSkip: {
+            'red': false,
+            'blue': false,
+            'green': false,
+            'yellow': false
+        },
+
         // Gatekeeper Flag: Has this team killed anyone? (Required to enter Layer 2)
-        hasKilled: { 'red': false, 'blue': false, 'green': false, 'yellow': false },
-        
+        hasKilled: {
+            'red': false,
+            'blue': false,
+            'green': false,
+            'yellow': false
+        },
+
         winnersList: [],
         pairWinnerOrder: [],
         isGameOver: false,
         isAnimating: false,
         isTurnOrderReversed: false,
-        
+
         // Move Banking (Handling 6/12 bonus rolls)
-        moveBank: [], 
+        moveBank: [],
         selectedBankIndex: -1,
-        pendingRolls: 1, 
+        pendingRolls: 1,
         moveHistory: [],
 
         // Snapshot for Undo functionality
-        saveHistory: function() {
+        saveHistory: function () {
             this.moveHistory.push(JSON.parse(JSON.stringify({
                 boardState: this.boardState,
                 finishedTeams: this.finishedTeams,
@@ -288,13 +402,13 @@
                 activeTeams: this.activeTeams
             })));
         },
-        undo: function() {
+        undo: function () {
             if (this.moveHistory.length === 0) return false;
             Object.assign(this, this.moveHistory.pop());
             return true;
         },
         // Complete Game Reset
-        reset: function() {
+        reset: function () {
             this.globalMoveCounter = 0;
             this.boardState = {};
             this.moveHistory = [];
@@ -305,7 +419,7 @@
             // Re-enable player count selection
             const countSel = document.getElementById('player-count-select');
             const count = countSel ? parseInt(countSel.value) : 4;
-            if(countSel) countSel.disabled = false;
+            if (countSel) countSel.disabled = false;
 
             // Setup Active Teams based on player count
             if (count === 2) {
@@ -327,14 +441,33 @@
             this.activeTeams.forEach(team => {
                 const home = Config.HOME_BASE_MAP[team];
                 for (let i = 0; i < 4; i++) {
-                    this.boardState[home].push({ id: `${team[0]}${i}`, team: team, arrival: this.globalMoveCounter++ });
+                    this.boardState[home].push({
+                        id: `${team[0]}${i}`,
+                        team: team,
+                        arrival: this.globalMoveCounter++
+                    });
                 }
             });
 
             // Reset Flags
-            this.finishedTeams = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
-            this.teamsToSkip = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
-            this.hasKilled = { 'red': false, 'blue': false, 'green': false, 'yellow': false };
+            this.finishedTeams = {
+                'red': false,
+                'blue': false,
+                'green': false,
+                'yellow': false
+            };
+            this.teamsToSkip = {
+                'red': false,
+                'blue': false,
+                'green': false,
+                'yellow': false
+            };
+            this.hasKilled = {
+                'red': false,
+                'blue': false,
+                'green': false,
+                'yellow': false
+            };
 
             this.winnersList = [];
             this.pairWinnerOrder = [];
@@ -342,10 +475,10 @@
             this.isAnimating = false;
             this.isTurnOrderReversed = false;
             this.selectedPawnInfo = null;
-            
+
             this.turnIndex = 0;
             this.currentTurn = this.activeTeams[0];
-            
+
             // Sync UI
             DiceGame.UI.resetVisuals();
             LudoGame.UI.updateTurn(); // Fix: Ensures Red turn is highlighted immediately
@@ -355,67 +488,122 @@
 
     // --- BOARD AUDIO SYNTHESIS ---
     let boardSynths = null;
+
     function getBoardSynths() {
-        if(boardSynths) return boardSynths;
+        if (boardSynths) return boardSynths;
         try {
-            if(window.Tone) {
+            if (window.Tone) {
                 boardSynths = {
-                    move: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination(),
-                    kill: new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination(),
-                    success: new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" }, envelope: { attack: 0.02, decay: 0.1, sustain: 0.1, release: 1 } }).toDestination(),
-                    reset: new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0 } }).toDestination()
+                    move: new Tone.MembraneSynth({
+                        pitchDecay: 0.01,
+                        octaves: 2,
+                        envelope: {
+                            attack: 0.001,
+                            decay: 0.1,
+                            sustain: 0
+                        }
+                    }).toDestination(),
+                    kill: new Tone.MembraneSynth({
+                        pitchDecay: 0.05,
+                        octaves: 4,
+                        envelope: {
+                            attack: 0.001,
+                            decay: 0.2,
+                            sustain: 0
+                        }
+                    }).toDestination(),
+                    success: new Tone.PolySynth(Tone.Synth, {
+                        oscillator: {
+                            type: "triangle"
+                        },
+                        envelope: {
+                            attack: 0.02,
+                            decay: 0.1,
+                            sustain: 0.1,
+                            release: 1
+                        }
+                    }).toDestination(),
+                    reset: new Tone.NoiseSynth({
+                        noise: {
+                            type: 'pink'
+                        },
+                        envelope: {
+                            attack: 0.01,
+                            decay: 0.3,
+                            sustain: 0
+                        }
+                    }).toDestination()
                 };
             }
-        } catch(e) { console.warn("Board audio init failed", e); }
+        } catch (e) {
+            console.warn("Board audio init failed", e);
+        }
         return boardSynths;
     }
 
     LudoGame.Audio = {
-        trigger: function(type) {
+        trigger: function (type) {
             try {
                 if (window.Tone && Tone.context.state !== 'running') Tone.start().catch(() => {});
                 const s = getBoardSynths();
-                if(!s) return;
+                if (!s) return;
                 const now = Tone.now();
                 switch (type) {
-                    case 'move': s.move.triggerAttackRelease("C5", "8n", now); break;
-                    case 'kill': s.kill.triggerAttackRelease("G2", "8n", now); break;
-                    case 'return': s.move.triggerAttackRelease("A3", "16n", now); s.move.triggerAttackRelease("E3", "16n", now + 0.1); break;
-                    case 'finish': s.success.triggerAttackRelease(["C5", "E5", "G5"], "8n", now); break;
-                    case 'gameover': s.success.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n", now); break;
-                    case 'reset': s.reset.triggerAttackRelease("8n", now); break;
+                    case 'move':
+                        s.move.triggerAttackRelease("C5", "8n", now);
+                        break;
+                    case 'kill':
+                        s.kill.triggerAttackRelease("G2", "8n", now);
+                        break;
+                    case 'return':
+                        s.move.triggerAttackRelease("A3", "16n", now);
+                        s.move.triggerAttackRelease("E3", "16n", now + 0.1);
+                        break;
+                    case 'finish':
+                        s.success.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
+                        break;
+                    case 'gameover':
+                        s.success.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n", now);
+                        break;
+                    case 'reset':
+                        s.reset.triggerAttackRelease("8n", now);
+                        break;
                 }
-            } catch(e) {}
+            } catch (e) {}
         }
     };
 
     // --- UTILITIES ---
     LudoGame.Utils = {
         // Checks if two colors are partners in Pair Mode (Red+Green, Blue+Yellow)
-        isTeammate: function(t1, t2) {
+        isTeammate: function (t1, t2) {
             if (!LudoGame.State.isPairMode || t1 === t2) return false;
             if ((t1 === 'red' && t2 === 'green') || (t1 === 'green' && t2 === 'red')) return true;
             if ((t1 === 'blue' && t2 === 'yellow') || (t1 === 'yellow' && t2 === 'blue')) return true;
             return false;
         },
-        getTeammate: function(t) {
-            if (t === 'red') return 'green'; if (t === 'green') return 'red';
-            if (t === 'blue') return 'yellow'; if (t === 'yellow') return 'blue';
+        getTeammate: function (t) {
+            if (t === 'red') return 'green';
+            if (t === 'green') return 'red';
+            if (t === 'blue') return 'yellow';
+            if (t === 'yellow') return 'blue';
             return null;
         },
         // Determines whose pawns to move (Self or Partner if finished)
-        getTeamToPlay: function() {
+        getTeamToPlay: function () {
             const current = LudoGame.State.currentTurn;
             if (!LudoGame.State.isPairMode || !LudoGame.State.finishedTeams[current]) return current;
             return this.getTeammate(current);
         },
-        distFromCenter: function(r, c) { return Math.max(Math.abs(r - 3), Math.abs(c - 3)); }
+        distFromCenter: function (r, c) {
+            return Math.max(Math.abs(r - 3), Math.abs(c - 3));
+        }
     };
 
     // --- BOARD UI RENDERING ---
     LudoGame.UI = {
         elements: {},
-        init: function() {
+        init: function () {
             this.elements = {
                 board: document.getElementById('game-board'),
                 wrapper: document.querySelector('.full-game-wrapper'),
@@ -429,17 +617,21 @@
                 modal: document.getElementById('modal-overlay'),
                 postPopup: document.getElementById('post-move-popup')
             };
-            return !!this.elements.board; 
+            return !!this.elements.board;
         },
         // Generates the 7x7 Grid with layers
-        buildGrid: function() {
+        buildGrid: function () {
             if (!this.elements.board) {
                 this.elements.board = document.getElementById('game-board');
-                if(!this.elements.board) return;
+                if (!this.elements.board) return;
             }
-            
-            const { ROWS, COLS, HOME_BASE_MAP } = LudoGame.Config;
-            this.elements.board.innerHTML = ''; 
+
+            const {
+                ROWS,
+                COLS,
+                HOME_BASE_MAP
+            } = LudoGame.Config;
+            this.elements.board.innerHTML = '';
 
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
@@ -460,7 +652,7 @@
                 }
             }
         },
-        createPawn: function(team, count) {
+        createPawn: function (team, count) {
             const stack = document.createElement('div');
             stack.classList.add('pawn-stack', `pawn-stack-${team}`);
             stack.dataset.team = team;
@@ -470,27 +662,29 @@
             stack.appendChild(counter);
             return stack;
         },
-        renderContainer: function(id) {
+        renderContainer: function (id) {
             const container = document.getElementById(id);
             if (!container) return;
             const pawns = LudoGame.State.boardState[id];
-            
+
             if (id === 'off-board-area') container.querySelectorAll('.pawn-stack').forEach(el => el.remove());
             else container.innerHTML = '';
-            
+
             const groups = {};
-            if (pawns) pawns.forEach(p => { groups[p.team] = (groups[p.team] || 0) + 1; });
+            if (pawns) pawns.forEach(p => {
+                groups[p.team] = (groups[p.team] || 0) + 1;
+            });
             for (const team in groups) {
                 const el = this.createPawn(team, groups[team]);
                 container.appendChild(el);
             }
         },
-        renderBoard: function() {
-            if(!this.elements.board) return;
+        renderBoard: function () {
+            if (!this.elements.board) return;
             for (const id in LudoGame.State.boardState) this.renderContainer(id);
         },
         // Renders the list of available dice rolls (if multiples pending)
-        renderMoveBank: function() {
+        renderMoveBank: function () {
             const bankList = document.getElementById('move-bank-list');
             const bankDisplay = document.getElementById('move-bank-display');
             if (!bankList || !bankDisplay) return;
@@ -504,7 +698,7 @@
                 btn.className = 'bank-item';
                 btn.innerText = val;
                 if (index === selectedIdx) btn.classList.add('selected');
-                
+
                 btn.addEventListener('click', () => {
                     LudoGame.State.selectedBankIndex = index;
                     LudoGame.UI.renderMoveBank();
@@ -514,7 +708,7 @@
             if (bank.length > 0) bankDisplay.classList.remove('hidden');
             else bankDisplay.classList.add('hidden');
         },
-        updateRollButtonState: function() {
+        updateRollButtonState: function () {
             const btn = document.getElementById('roll-button');
             if (!btn) return;
             const canRoll = LudoGame.State.pendingRolls > 0 && !LudoGame.State.isGameOver && !LudoGame.State.isAnimating;
@@ -523,22 +717,22 @@
             btn.innerText = canRoll ? "Roll" : (LudoGame.State.moveBank.length > 0 ? "Move Pawn" : "Wait");
         },
         // Update the visual indicator of whose turn it is
-        updateTurn: function() {
-            if(!this.elements.turnDisplay) return;
+        updateTurn: function () {
+            if (!this.elements.turnDisplay) return;
             const turn = LudoGame.State.currentTurn;
             this.elements.turnDisplay.style.backgroundColor = LudoGame.Config.TEAM_COLORS[turn];
             this.elements.turnDisplay.style.transform = "scale(1.2)";
             setTimeout(() => {
-                if(this.elements.turnDisplay) this.elements.turnDisplay.style.transform = "scale(1)";
+                if (this.elements.turnDisplay) this.elements.turnDisplay.style.transform = "scale(1)";
             }, 200);
 
-            if(this.elements.board) {
+            if (this.elements.board) {
                 this.elements.board.classList.remove('board-turn-red', 'board-turn-blue', 'board-turn-green', 'board-turn-yellow');
                 this.elements.board.classList.add(`board-turn-${turn}`);
             }
         },
-        updateWinners: function() {
-            if(!this.elements.winnersList) return;
+        updateWinners: function () {
+            if (!this.elements.winnersList) return;
             this.elements.winnersList.innerHTML = '';
             const list = LudoGame.State.isPairMode ? LudoGame.State.pairWinnerOrder : LudoGame.State.winnersList;
             list.forEach((name, i) => {
@@ -548,36 +742,39 @@
             });
         },
         // Helpers for popup/modal controls (mostly unused in strict click mode but kept for safety)
-        highlightPath: function(team, startId) {},
-        clearHighlights: function() {
+        highlightPath: function (team, startId) {},
+        clearHighlights: function () {
             document.querySelectorAll('.path-highlight').forEach(el => {
                 el.className = el.className.replace(/path-highlight.*/, '').trim();
                 el.style.animationDelay = '0s';
             });
         },
-        showPopup: function(cell, showSelect) {},
-        hidePopup: function() {
-            if(!this.elements.popup) return;
+        showPopup: function (cell, showSelect) {},
+        hidePopup: function () {
+            if (!this.elements.popup) return;
             this.elements.popup.classList.add('hidden');
         },
-        showPostMove: function() {
-            if(!this.elements.modal) return;
+        showPostMove: function () {
+            if (!this.elements.modal) return;
             this.elements.modal.classList.remove('hidden');
             this.elements.postPopup.classList.remove('hidden');
         },
-        hidePostMove: function() {
-            if(!this.elements.modal) return;
+        hidePostMove: function () {
+            if (!this.elements.modal) return;
             this.elements.modal.classList.add('hidden');
             this.elements.postPopup.classList.add('hidden');
         },
         // Calculates screen coordinates for animations
-        getCoords: function(el) {
+        getCoords: function (el) {
             const r1 = this.elements.wrapper.getBoundingClientRect();
             const r2 = el.getBoundingClientRect();
-            return { x: (r2.left - r1.left) + (r2.width / 2) - 13, y: (r2.top - r1.top) + (r2.height / 2) - 13 };
+            return {
+                x: (r2.left - r1.left) + (r2.width / 2) - 13,
+                y: (r2.top - r1.top) + (r2.height / 2) - 13
+            };
         },
         // Handles the floating pawn animation
-        animateMove: async function(team, startId, steps) {
+        animateMove: async function (team, startId, steps) {
             const startCell = document.getElementById(startId);
             const startXY = this.getCoords(startCell);
             const floater = document.createElement('div');
@@ -609,11 +806,11 @@
          * Calculates all valid moves for the current player based on dice roll.
          * Enforces strict rules: Anchor, Gatekeeper, Path Boundaries.
          */
-        getValidMoves: function(team, diceValue) {
+        getValidMoves: function (team, diceValue) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             const Utils = LudoGame.Utils;
-            
+
             // 1. Determine Effective Team
             // In Pair Mode, if I am finished, I control my partner's pawns.
             let effectiveTeam = team;
@@ -625,17 +822,17 @@
 
             // 2. Setup Restriction Data
             const homeId = Config.HOME_BASE_MAP[effectiveTeam];
-            
+
             // Count pawns at home for the Anchor Rule
-            const pawnsAtHomeCount = State.boardState[homeId] ? 
+            const pawnsAtHomeCount = State.boardState[homeId] ?
                 State.boardState[homeId].filter(p => p.team === effectiveTeam).length : 0;
-            
+
             // Count finished pawns for the Anchor Rule
-            const pawnsFinishedCount = State.boardState['off-board-area'] ? 
+            const pawnsFinishedCount = State.boardState['off-board-area'] ?
                 State.boardState['off-board-area'].filter(p => p.team === effectiveTeam).length : 0;
 
             const validMoves = [];
-            const path = Config.TEAM_PATHS[effectiveTeam]; 
+            const path = Config.TEAM_PATHS[effectiveTeam];
             const GATE_INDEX = 23; // Index of the last cell in the Outer Layer
 
             // Iterate through every cell on the board
@@ -644,14 +841,14 @@
 
                 // Only look at pawns belonging to the effective team
                 const teamPawns = pawns.filter(p => p.team === effectiveTeam);
-                
+
                 if (teamPawns.length > 0) {
-                    const pawn = teamPawns[0]; 
+                    const pawn = teamPawns[0];
 
                     // --- RESTRICTION A: ANCHOR PAWN ---
                     // Rule: Cannot move the *last* pawn from Home Base unless at least one pawn has finished.
                     if (cellId === homeId && pawnsAtHomeCount === 1 && pawnsFinishedCount === 0) {
-                        continue; 
+                        continue;
                     }
 
                     const currentIdx = path.indexOf(cellId);
@@ -670,7 +867,7 @@
                             validMoves.push({
                                 fromId: cellId,
                                 toId: path[targetIdx],
-                                pawn: pawn 
+                                pawn: pawn
                             });
                         }
                     }
@@ -680,26 +877,26 @@
         },
 
         // Triggered when dice animation completes
-        onDiceRolled: function(score) {
+        onDiceRolled: function (score) {
             const State = LudoGame.State;
             State.moveBank.push(score);
-            State.pendingRolls--; 
-            
+            State.pendingRolls--;
+
             // Bonus Roll Rule: 6 or 12 grants another turn
             let bonusEarned = false;
             if (score === 6 || score === 12) {
                 bonusEarned = true;
-                State.pendingRolls++; 
+                State.pendingRolls++;
             }
-            
+
             const moves = this.getValidMoves(State.currentTurn, score);
-            
+
             // Auto-Resolution Logic
             if (moves.length === 0) {
                 console.log("No valid moves. Skipping turn.");
-                State.pendingRolls = 0; 
+                State.pendingRolls = 0;
                 State.moveBank = [];
-                setTimeout(() => this.advanceTurn(), 1000); 
+                setTimeout(() => this.advanceTurn(), 1000);
 
             } else if (moves.length === 1) {
                 console.log("Single move possible. Auto-executing.");
@@ -715,14 +912,14 @@
             }
         },
 
-        clearSelection: function() { },
+        clearSelection: function () {},
 
         // Handles Turn Rotation
-        advanceTurn: function() {
+        advanceTurn: function () {
             const State = LudoGame.State;
             const UI = LudoGame.UI;
             if (State.isGameOver) return;
-            
+
             do {
                 const totalActive = State.activeTeams.length;
                 if (State.isTurnOrderReversed) {
@@ -730,15 +927,15 @@
                 } else {
                     State.turnIndex = (State.turnIndex + 1) % totalActive;
                 }
-                
+
                 const next = State.activeTeams[State.turnIndex];
-                
+
                 if (State.isPairMode) {
                     // Pair Mode Skip Logic:
                     // If 'teamsToSkip' is set (just finished), consume flag and skip once.
                     if (State.teamsToSkip[next] === true) {
-                        State.teamsToSkip[next] = false; 
-                        continue; 
+                        State.teamsToSkip[next] = false;
+                        continue;
                     }
                     break;
                 } else {
@@ -750,7 +947,7 @@
                     }
                 }
             } while (true);
-            
+
             State.currentTurn = State.activeTeams[State.turnIndex];
             State.moveBank = [];
             State.selectedBankIndex = -1;
@@ -761,7 +958,7 @@
             DiceGame.UI.resetVisuals();
         },
 
-        reverseLastMove: function() {
+        reverseLastMove: function () {
             const State = LudoGame.State;
             const UI = LudoGame.UI;
             if (State.isAnimating) return;
@@ -769,17 +966,17 @@
                 UI.renderBoard();
                 UI.updateTurn();
                 UI.updateWinners();
-                UI.renderMoveBank(); 
+                UI.renderMoveBank();
                 UI.updateRollButtonState();
                 LudoGame.Audio.trigger('return');
             }
         },
 
-        manualTurnChange: function(offset) {
+        manualTurnChange: function (offset) {
             const State = LudoGame.State;
             if (State.isGameOver) return;
             LudoGame.UI.hidePopup();
-            
+
             let idx = State.turnIndex;
             let safety = 0;
             const totalActive = State.activeTeams.length;
@@ -788,12 +985,13 @@
                 idx = (idx + offset + totalActive) % totalActive;
                 const next = State.activeTeams[idx];
                 if (!State.isPairMode && State.finishedTeams[next]) {
-                    safety++; if (safety > 4) break;
+                    safety++;
+                    if (safety > 4) break;
                     continue;
                 }
                 break;
             } while (true);
-            
+
             State.turnIndex = idx;
             State.currentTurn = State.activeTeams[idx];
 
@@ -808,7 +1006,7 @@
         /**
          * Executes the physical move, handles animations, kills, and win conditions.
          */
-        performMove: async function(fromId, toId, pawn) {
+        performMove: async function (fromId, toId, pawn) {
             const State = LudoGame.State;
             const Config = LudoGame.Config;
             const UI = LudoGame.UI;
@@ -825,7 +1023,7 @@
                 // 1. Save History & UI Lock
                 State.saveHistory();
                 State.isAnimating = true;
-                if(UI.elements.modeBtn) UI.elements.modeBtn.disabled = true;
+                if (UI.elements.modeBtn) UI.elements.modeBtn.disabled = true;
                 const pSelect = document.getElementById('player-count-select');
                 if (pSelect) pSelect.disabled = true;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = true;
@@ -833,7 +1031,7 @@
                 // 2. Remove Pawn from Old Cell
                 State.boardState[fromId] = State.boardState[fromId].filter(p => p.id !== pawn.id);
                 UI.renderContainer(fromId);
-                
+
                 // 3. Animation Path Calculation
                 // If endIdx < startIdx, it means we wrapped around the loop (Gatekeeper Rule)
                 let steps = [];
@@ -846,7 +1044,7 @@
                     steps = path.slice(startIdx + 1, endIdx + 1);
                 }
                 await UI.animateMove(pawn.team, fromId, steps);
-                
+
                 // 4. Place Pawn in New Cell
                 pawn.arrival = State.globalMoveCounter++;
                 State.boardState[toId].push(pawn);
@@ -855,7 +1053,7 @@
                 if (State.selectedBankIndex > -1) {
                     State.moveBank.splice(State.selectedBankIndex, 1);
                     State.selectedBankIndex = -1;
-                    if(State.moveBank.length > 0) State.selectedBankIndex = 0;
+                    if (State.moveBank.length > 0) State.selectedBankIndex = 0;
                 }
 
                 // 6. Kill Logic
@@ -865,18 +1063,18 @@
                 if (!isOff) {
                     const pawnsInDest = State.boardState[toId];
                     // Find Valid Victims (Different team, not teammate)
-                    const victims = pawnsInDest.filter(p => 
-                        p.id !== pawn.id && 
-                        p.team !== pawn.team && 
+                    const victims = pawnsInDest.filter(p =>
+                        p.id !== pawn.id &&
+                        p.team !== pawn.team &&
                         !Utils.isTeammate(p.team, pawn.team)
                     );
-                    
+
                     if (victims.length > 0) {
                         if (isSpecial) {
                             console.log(`Kill Prevented: Safe Zone.`);
                         } else {
                             // KILL CONFIRMED!
-                            
+
                             // Unlock Gate for this team (and partner)
                             if (State.hasKilled) {
                                 State.hasKilled[pawn.team] = true;
@@ -885,13 +1083,13 @@
                                     State.hasKilled[partner] = true;
                                 }
                             }
-                            
+
                             // Send victim home
                             const victim = victims.sort((a, b) => a.arrival - b.arrival)[0];
                             const home = Config.HOME_BASE_MAP[victim.team];
                             State.boardState[toId] = State.boardState[toId].filter(p => p.id !== victim.id);
                             State.boardState[home].push(victim);
-                            
+
                             Audio.trigger('kill');
                             State.pendingRolls++; // Bonus roll for kill
                             setTimeout(() => Audio.trigger('return'), 400);
@@ -903,15 +1101,15 @@
                 if (isOff) {
                     Audio.trigger('finish');
                     const offPawns = State.boardState['off-board-area'].filter(p => p.team === pawn.team);
-                    
+
                     // If all 4 pawns finished...
                     if (offPawns.length === 4 && !State.finishedTeams[pawn.team]) {
                         State.finishedTeams[pawn.team] = true;
 
                         if (State.isPairMode) {
                             // Apply "Skip One Turn" penalty to allow partner catch up logic to reset
-                            State.teamsToSkip[pawn.team] = true; 
-                            
+                            State.teamsToSkip[pawn.team] = true;
+
                             const partner = Utils.getTeammate(pawn.team);
                             if (State.finishedTeams[partner]) {
                                 // Both partners done = GAME OVER
@@ -952,7 +1150,7 @@
             } finally {
                 State.isAnimating = false;
                 if (UI.elements.popupMoveBtn) UI.elements.popupMoveBtn.disabled = false;
-                if(UI.elements.modeBtn) UI.elements.modeBtn.disabled = false;
+                if (UI.elements.modeBtn) UI.elements.modeBtn.disabled = false;
                 UI.updateRollButtonState();
             }
         }
@@ -961,24 +1159,24 @@
     /* ==========================================================================
        PART 3: STARTUP SEQUENCE & EVENT LISTENERS
        ========================================================================== */
-    
+
     function setupEventListeners() {
         const Core = LudoGame.Core;
         const UI = LudoGame.UI;
         const State = LudoGame.State;
-        
-        document.getElementById('undo-btn')?.addEventListener('click', () => Core.reverseLastMove());
-        
+
+        document.getElementById('undo-btn') ? .addEventListener('click', () => Core.reverseLastMove());
+
         // Player Count Change Listener
         const pCount = document.getElementById('player-count-select');
-        if(pCount) {
+        if (pCount) {
             pCount.addEventListener('change', () => {
                 document.getElementById('reset-btn').click();
             });
         }
 
         // Mode Toggle (Solo vs Pair)
-        document.getElementById('mode-toggle')?.addEventListener('click', () => {
+        document.getElementById('mode-toggle') ? .addEventListener('click', () => {
             State.isPairMode = !State.isPairMode;
 
             const icon = document.querySelector('#mode-toggle img');
@@ -987,16 +1185,18 @@
             }
 
             const sel = document.getElementById('player-count-select');
-            if(sel) {
+            if (sel) {
                 // In pair mode, we force 4 players
-                if(State.isPairMode) { sel.value = "4"; sel.disabled = true; }
-                else sel.disabled = false;
+                if (State.isPairMode) {
+                    sel.value = "4";
+                    sel.disabled = true;
+                } else sel.disabled = false;
             }
             document.getElementById('reset-btn').click();
         });
 
         // Reset Game Button
-        document.getElementById('reset-btn')?.addEventListener('click', () => {
+        document.getElementById('reset-btn') ? .addEventListener('click', () => {
             if (confirm("Reset Game?")) {
                 LudoGame.Audio.trigger('reset');
                 State.reset();
@@ -1016,10 +1216,10 @@
         const iconEye = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
         const iconEyeSlash = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path></svg>`;
 
-        if(visBtn && controlsContainer) {
+        if (visBtn && controlsContainer) {
             visBtn.addEventListener('click', () => {
                 const isHidden = controlsContainer.classList.toggle('hidden');
-                
+
                 if (isHidden) {
                     visBtn.innerHTML = iconEyeSlash;
                     visBtn.title = "Show Controls";
@@ -1035,13 +1235,13 @@
         const bgAudio = document.getElementById('bg-music');
 
         if (musicBtn && bgAudio) {
-            bgAudio.volume = 0.3; 
+            bgAudio.volume = 0.3;
 
             musicBtn.addEventListener('click', () => {
                 if (bgAudio.paused) {
                     bgAudio.play().catch(e => console.warn("Audio play blocked:", e));
-                    musicBtn.classList.add('playing'); 
-                    musicBtn.style.opacity = "1"; 
+                    musicBtn.classList.add('playing');
+                    musicBtn.style.opacity = "1";
                 } else {
                     bgAudio.pause();
                     musicBtn.style.opacity = "0.5";
@@ -1049,31 +1249,31 @@
                 }
             });
         }
-        
+
         // Manual Turn Controls (Debug/Override)
-        document.getElementById('prev-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(-1));
-        document.getElementById('next-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(1));
+        document.getElementById('prev-turn-btn') ? .addEventListener('click', () => Core.manualTurnChange(-1));
+        document.getElementById('next-turn-btn') ? .addEventListener('click', () => Core.manualTurnChange(1));
 
         // Dice Roll Trigger
-        document.getElementById('roll-button')?.addEventListener('click', () => {
+        document.getElementById('roll-button') ? .addEventListener('click', () => {
             DiceGame.Core.roll();
         });
-        
+
         // --- CLICK-TO-MOVE LOGIC ---
         document.body.addEventListener('click', (event) => {
             if (State.isGameOver || State.isAnimating) return;
-            
+
             const clickedContainer = event.target.closest('.pawn-container');
             // Ignore clicks on UI elements
             if (event.target.closest('.dice-roller') || event.target.closest('#move-bank-list')) return;
-            
+
             if (!clickedContainer) return;
             const containerId = clickedContainer.id;
 
             // 1. Ensure we have a dice roll available
-            if(State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
+            if (State.selectedBankIndex === -1 || !State.moveBank[State.selectedBankIndex]) {
                 console.warn("You must roll the dice first!");
-                return; 
+                return;
             }
 
             const currentDiceValue = State.moveBank[State.selectedBankIndex];
@@ -1081,13 +1281,13 @@
 
             // 2. ASK CORE: "Is this move valid?" (This enforces strict rules like Anchor & Gate)
             const allowedMoves = Core.getValidMoves(State.currentTurn, currentDiceValue);
-            
+
             // 3. Check if the clicked cell is in the allowed list
             const validMove = allowedMoves.find(m => m.fromId === containerId && m.pawn.team === teamToPlay);
 
             if (!validMove) {
                 console.warn("Move Invalid (Blocked by Rules or Path).");
-                return; 
+                return;
             }
 
             // 4. Execute the sanctioned move
@@ -1100,7 +1300,7 @@
     let attempts = 0;
     const startGame = () => {
         const boardReady = LudoGame.UI.init();
-        const diceReady = DiceGame.UI.init(); 
+        const diceReady = DiceGame.UI.init();
 
         if (boardReady && diceReady) {
             console.log("Game Modules Loaded.");
@@ -1124,9 +1324,9 @@
     } else {
         startGame();
     }
-    
+
     // Expose Namespaces
     window.LudoGame = LudoGame;
     window.DiceGame = DiceGame;
-    
+
 })();
