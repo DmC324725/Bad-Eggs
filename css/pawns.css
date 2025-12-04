@@ -137,3 +137,52 @@
     /* Higher shadow while flying */
     pointer-events: none;
 }
+
+/* === RESPONSIVE PAWN SCALING === */
+/* Only target pawns inside the grid cells */
+.grid-cell .pawn-stack {
+    /* Switch from fixed px to percentage of the cell */
+    width: 40%;   
+    height: 55%;
+    
+    /* Ensure they don't get too small on tiny phones */
+    min-width: 16px;
+    min-height: 22px;
+}
+
+/* Make the number text scale down so it fits inside the smaller egg */
+.grid-cell .pawn-counter {
+    /* Clamp: Minimum 10px, Preferred 25% of cell, Maximum 16px */
+    font-size: clamp(10px, 25%, 16px);
+}
+
+/* Optional: Adjust the Floating Pawn (animation) to match tablet size approximately */
+/* Since this flies over the board, we can't use %, so we use viewport units */
+@media (max-width: 900px) {
+    .floating-pawn {
+        width: 5vw;
+        height: 7vw;
+    }
+}
+
+/* === RESPONSIVE TEXT SCALING === */
+
+/* 1. TABLET/FLUID MODE (Max-Width 900px) */
+/* The board is 85% of screen width, so we size text relative to screen width */
+@media (max-width: 900px) {
+    .grid-cell .pawn-counter {
+        /* 3vw ensures the text grows huge when the board fills an iPad screen */
+        font-size: 3vw; 
+    }
+}
+
+/* 2. MOBILE/COMPACT MODE (Max-Width 680px) */
+/* The board cells are locked to 44px, so we lock the text size too */
+@media (max-width: 680px) {
+    .grid-cell .pawn-counter {
+        font-size: 12px; /* Small but readable */
+        
+        /* Optional: adjust text shadow for cleaner look at small sizes */
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+}

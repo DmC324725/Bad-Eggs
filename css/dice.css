@@ -1,224 +1,152 @@
 /* DICE ROLLER
-    ===========
-    Styles for the dice container, individual dice, confetti,
-    and the roll button.
+   ===========
+   Styles for the dice container, individual dice, confetti,
+   and the layout (2-Column).
 */
 
-/* --- 1. Container --- */
+/* --- 1. Container (Flex Row) --- */
 .dice-roller {
     width: 100%;
-    min-height: 100px;
-    padding: 20px;
-    background-color: #374151;
-    /* Dark Slate */
+    /* Remove min-height constraint to let it be compact */
+    padding: 10px; 
+    
+    background-color: #374151; /* Dark Slate */
     color: white;
     border: 2px solid #9e9e9e;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
+    
+    /* THE LAYOUT CHANGE: Side by Side */
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    
     box-sizing: border-box;
     position: relative;
+    
+    /* Prevent user selection highlighting when spamming clicks */
+    user-select: none; 
 }
 
+/* Hide the old header if it exists */
 .dice-roller h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #22d3ee;
-    /* Cyan */
+    display: none; 
 }
 
-/* --- 2. The Grid of 6 Dice --- */
+/* --- 2. LEFT COL: The Dice Grid --- */
 #dice-container {
+    /* Takes up about half the width */
+    flex: 1; 
+    
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 1rem;
+    /* 3 Columns x 2 Rows grid inside the left column */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 6px;
+    
+    /* INTERACTIVITY */
+    cursor: pointer;
+    transition: transform 0.1s ease;
 }
 
+/* Hover Effect: Show it's clickable */
+#dice-container:hover {
+    filter: brightness(1.1);
+}
+
+#dice-container:active {
+    transform: scale(0.96); /* Satisfying click press */
+}
+
+/* The Individual Die */
 .dice-roller .dice {
     width: 100%;
-    padding-top: 100%;
-    /* Enforces 1:1 Aspect Ratio */
+    padding-top: 100%; /* 1:1 Aspect Ratio */
     height: 0;
     position: relative;
-    font-size: 1.5rem;
-    font-weight: 700;
-    border-radius: 9999px;
-    /* Circle */
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px; /* Slightly squarer for tighter packing */
+    
+    /* Colors */
     background-color: #4b5563;
-    /* Default Gray */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Center the SVG inside the die */
-.dice-roller .dice>* {
+/* Center the SVG/Text inside the die */
+.dice-roller .dice > * {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 40px;
-    width: 40px;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
-/* Dice States */
-.dice-roller .dice.dice-bg-rolling {
-    background-color: #374151;
+/* Dice Color States */
+.dice-roller .dice.dice-bg-rolling { background-color: #374151; }
+.dice-roller .dice.dice-bg-1 { background-color: #0e7490; } /* Cyan */
+.dice-roller .dice.dice-bg-0 { background-color: #4b5563; } /* Gray */
+
+/* --- 3. RIGHT COL: Info & Results --- */
+.dice-info-col {
+    /* Takes up the other half */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-left: 1px solid rgba(255,255,255,0.1); /* Divider Line */
+    padding-left: 5px;
 }
 
-.dice-roller .dice.dice-bg-1 {
-    background-color: #0e7490;
-}
-
-/* Cyan */
-.dice-roller .dice.dice-bg-0 {
-    background-color: #4b5563;
-}
-
-/* Gray */
-
-/* Spinning Animation for rolling state */
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* --- 3. Result Display --- */
+/* Result Number */
 #result-display-container {
     text-align: center;
-    margin-bottom: 1rem;
-}
-
-#result-display-container h2 {
-    font-size: 1.125rem;
-    color: #9ca3af;
 }
 
 #result-display {
-    font-size: 3.75rem;
+    font-size: 3rem; /* Compact but large */
     font-weight: 900;
     line-height: 1;
     color: white;
 }
 
 /* Result Colors */
-#result-display.dice-result-12 {
-    color: #facc15;
-}
+#result-display.dice-result-12 { color: #facc15; } /* Yellow */
+#result-display.dice-result-6 { color: #a3e635; }  /* Lime */
+#result-display.dice-result-normal { color: #22d3ee; } /* Cyan */
 
-/* Yellow */
-#result-display.dice-result-6 {
-    color: #a3e635;
-}
-
-/* Lime */
-#result-display.dice-result-normal {
-    color: #22d3ee;
-}
-
-/* Cyan */
-
-/* --- 4. Buttons --- */
-#roll-button {
-    width: 100%;
-    background-color: #0891b2;
-    color: white;
-    font-weight: 700;
-    padding: 12px 16px;
-    border-radius: 0.5rem;
-    font-size: 1.125rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s;
-    border: none;
-}
-
-#roll-button:hover {
-    background-color: #0e7490;
-}
-
-#roll-button:active {
-    transform: scale(0.95);
-}
-
-#roll-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* --- 5. Confetti --- */
-#confetti-container {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    border-radius: 0.5rem;
-}
-
-.confetti-piece {
-    position: absolute;
-    width: 8px;
-    height: 16px;
-    border-radius: 4px;
-    opacity: 1;
-    transition: transform 2s ease-out, opacity 2s ease-out;
-    will-change: transform, opacity;
-}
-
-.confetti-yellow {
-    background-color: #facc15;
-}
-
-.confetti-cyan {
-    background-color: #22d3ee;
-}
-
-.confetti-pink {
-    background-color: #ec4899;
-}
-
-.confetti-lime {
-    background-color: #a3e635;
-}
-
-/* === NEW: MOVE BANK STYLES === */
+/* Move Bank (Available Moves) */
 #move-bank-display {
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    box-sizing: border-box;
+    background: rgba(0,0,0,0.2);
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
 }
 
 .bank-item {
-    width: 40px;
-    height: 40px;
+    width: 28px;  /* Smaller to fit column */
+    height: 28px;
     border-radius: 50%;
     background-color: #4b5563;
     color: white;
     font-weight: bold;
-    font-size: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.5);
     cursor: pointer;
-    transition: transform 0.1s;
+    
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.1s;
 }
 
 .bank-item:hover {
@@ -227,15 +155,28 @@
 }
 
 .bank-item.selected {
-    background-color: #22d3ee;
-    /* Cyan */
+    background-color: #22d3ee; 
     color: #000;
     border-color: #fff;
-    box-shadow: 0 0 10px #22d3ee;
+    box-shadow: 0 0 5px #22d3ee;
 }
 
-#roll-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(100%);
+/* --- 4. Confetti (Unchanged) --- */
+#confetti-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: 0.5rem;
 }
+.confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 16px;
+    border-radius: 4px;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.confetti-red { background-color: #e53935; }
+.confetti-blue { background-color: #1e88e5; }
+.confetti-green { background-color: #43a047; }
+.confetti-yellow { background-color: #fdd835; }

@@ -134,3 +134,47 @@
         max-width: 320px;
     }
 }
+
+/* Tablets & Narrow Screens (Portrait and Landscape) */
+@media (max-width: 900px) {
+
+    /* --- SIDEBAR ADJUSTMENTS (Keep your existing ones) --- */
+    .full-game-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    .sidebar {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .dice-roller {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    /* --- THE BIG BOARD FIX --- */
+    #game-board {
+        /* 1. Make it fluid: 85% of the viewport width */
+        width: 85vw;
+        height: 85vw; /* Keeps it perfectly square */
+        
+        /* 2. Cap the size so it doesn't get absurdly huge on iPad Pros */
+        max-width: 650px;
+        max-height: 650px;
+        
+        /* 3. Switch Grid to Fractions (Fluid) instead of Pixels (Fixed) */
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        
+        /* 4. Reset borders/shadows slightly for the new scale */
+        border-width: 4px;
+    }
+
+    /* Allow cells to shrink/grow freely */
+    .grid-cell {
+        min-width: 0;
+        min-height: 0;
+    }
+}

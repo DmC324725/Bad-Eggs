@@ -172,10 +172,9 @@
                 container: document.getElementById('dice-container'),
                 dice: document.querySelectorAll('.dice'),
                 display: document.getElementById('result-display'),
-                btn: document.getElementById('roll-button'),
                 confetti: document.getElementById('confetti-container')
             };
-            return !!this.elements.btn;
+            return !!this.elements.container;
         },
         setResult: function (text, classType) {
             if (!this.elements.display) return;
@@ -245,8 +244,8 @@
             DiceGame.UI.setDieLoading();
             DiceGame.Audio.playRattle();
 
-            const btn = document.getElementById('roll-button');
-            if (btn) btn.disabled = true;
+            const container = document.getElementById('dice-container');
+            if (container) container.style.pointerEvents = 'none';
 
             let diceLandedCount = 0;
             let sum = 0;
@@ -709,12 +708,26 @@
             else bankDisplay.classList.add('hidden');
         },
         updateRollButtonState: function () {
-            const btn = document.getElementById('roll-button');
-            if (!btn) return;
+            const diceContainer = document.getElementById('dice-container');
+            const bankDisplay = document.getElementById('move-bank-display');
+            
+            if (!diceContainer) return;
+
             const canRoll = LudoGame.State.pendingRolls > 0 && !LudoGame.State.isGameOver && !LudoGame.State.isAnimating;
-            btn.disabled = !canRoll;
-            btn.style.opacity = canRoll ? "1" : "0.5";
-            btn.innerText = canRoll ? "Roll" : (LudoGame.State.moveBank.length > 0 ? "Move Pawn" : "Wait");
+
+            if (canRoll) {
+                // Active State
+                diceContainer.style.opacity = "1";
+                diceContainer.style.cursor = "pointer";
+                diceContainer.style.pointerEvents = "auto";
+                if (bankDisplay) bankDisplay.style.opacity = "0.5"; // Dim the bank while we need to roll
+            } else {
+                // Disabled State (Waiting for move or animation)
+                diceContainer.style.opacity = "0.5";
+                diceContainer.style.cursor = "default";
+                diceContainer.style.pointerEvents = "none"; // Prevent clicks
+                if (bankDisplay) bankDisplay.style.opacity = "1"; // Highlight the bank if we have moves
+            }
         },
         // Update the visual indicator of whose turn it is
         updateTurn: function () {
@@ -1254,9 +1267,12 @@
         document.getElementById('prev-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(-1));
         document.getElementById('next-turn-btn')?.addEventListener('click', () => Core.manualTurnChange(1));
 
-        // Dice Roll Trigger
-        document.getElementById('roll-button')?.addEventListener('click', () => {
-            DiceGame.Core.roll();
+        // Dice Roll Trigger (Now clicking the dice themselves)
+        document.getElementById('dice-container')?.addEventListener('click', () => {
+            // Only allow click if pending rolls exist and not currently animating
+            if (LudoGame.State.pendingRolls > 0 && !LudoGame.State.isAnimating) {
+                DiceGame.Core.roll();
+            }
         });
 
         // --- CLICK-TO-MOVE LOGIC ---
