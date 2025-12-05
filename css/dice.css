@@ -60,6 +60,10 @@
     transform: scale(0.96);
     /* Satisfying click press */
 }
+ .dice-roller {
+        width: 100%;
+        max-width: 800px;
+    }
 
 /* The Individual Die */
 .dice-roller .dice {
@@ -114,7 +118,7 @@
 /* Result Number */
 #result-display-container {
     text-align: center;
-    flex: 0 0 100px;
+    flex: 0 0 50px;
 }
 
 #result-display {

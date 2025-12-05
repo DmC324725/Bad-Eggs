@@ -153,7 +153,7 @@
 /* Make the number text scale down so it fits inside the smaller egg */
 .grid-cell .pawn-counter {
     /* Clamp: Minimum 10px, Preferred 25% of cell, Maximum 16px */
-    font-size: clamp(10px, 25%, 16px);
+        font-size: 3vw; 
 }
 
 /* Optional: Adjust the Floating Pawn (animation) to match tablet size approximately */
@@ -180,7 +180,7 @@
 /* The board cells are locked to 44px, so we lock the text size too */
 @media (max-width: 680px) {
     .grid-cell .pawn-counter {
-        font-size: 12px; /* Small but readable */
+        font-size: 3vw; 
         
         /* Optional: adjust text shadow for cleaner look at small sizes */
         text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
