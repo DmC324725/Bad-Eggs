@@ -704,8 +704,6 @@
                 });
                 bankList.appendChild(btn);
             });
-            if (bank.length > 0) bankDisplay.classList.remove('hidden');
-            else bankDisplay.classList.add('hidden');
         },
         updateRollButtonState: function () {
             const diceContainer = document.getElementById('dice-container');

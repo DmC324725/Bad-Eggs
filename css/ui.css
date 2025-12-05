@@ -15,10 +15,10 @@
 
 /* --- 1. Sidebar Wrapper --- */
 .sidebar {
+        width: 85vw;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 174px;
     flex-shrink: 0;
 }
 

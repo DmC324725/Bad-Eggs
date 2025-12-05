@@ -6,23 +6,17 @@
 /* Tablets & Narrow Screens */
 @media (max-width: 900px) {
 
-    /* Move sidebar below the board */
-    .full-game-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-
     /* Sidebar becomes a horizontal row */
     .sidebar {
         flex-direction: row;
         flex-wrap: wrap;
-        width: 100%;
+        width: 85vw;
         justify-content: center;
     }
 
     .dice-roller {
         width: 100%;
-        max-width: 320px;
+        max-width: 800px;
     }
 }
 
@@ -116,14 +110,8 @@
         min-height: 44px;
     }
 
-    /* Move sidebar below board */
-    .full-game-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-
     .sidebar {
-        width: 100%;
+        width: 85vw;
         flex-direction: row;
         /* Keep sidebar items side-by-side if they fit */
         justify-content: center;
@@ -131,7 +119,7 @@
 
     .dice-roller {
         width: 100%;
-        max-width: 320px;
+        max-width: 800px;
     }
 }
 
@@ -139,19 +127,15 @@
 @media (max-width: 900px) {
 
     /* --- SIDEBAR ADJUSTMENTS (Keep your existing ones) --- */
-    .full-game-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
     .sidebar {
         flex-direction: row;
-        width: 100%;
+        width: 85vw;
         justify-content: center;
         margin-top: 20px;
     }
     .dice-roller {
         width: 100%;
-        max-width: 320px;
+        max-width: 800px;
     }
 
     /* --- THE BIG BOARD FIX --- */
@@ -161,8 +145,8 @@
         height: 85vw; /* Keeps it perfectly square */
         
         /* 2. Cap the size so it doesn't get absurdly huge on iPad Pros */
-        max-width: 650px;
-        max-height: 650px;
+        max-width: 800px;
+        max-height: 800px;
         
         /* 3. Switch Grid to Fractions (Fluid) instead of Pixels (Fixed) */
         grid-template-columns: repeat(7, 1fr);

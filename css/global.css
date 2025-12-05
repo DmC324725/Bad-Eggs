@@ -26,13 +26,13 @@ body {
     On mobile, these stack via responsive.css.
 */
 .full-game-wrapper {
+    flex-direction: column;
     display: flex;
-    align-items: flex-start;
-    gap: 20px;
+    align-items: center;
+    gap: 10px;
     position: relative;
     /* Used for positioning absolute popups */
     width: 100%;
-    max-width: 1000px;
     justify-content: center;
 }
 
